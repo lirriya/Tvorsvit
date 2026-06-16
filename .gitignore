@@ -1,0 +1,14 @@
+# Frontend ignores
+**/node_modules/
+**/dist/
+**/.env
+
+# Backend ignores
+**/target/
+**/.idea/
+**/*.iml
+**/.settings/
+**/.classpath
+**/.project
+
+trovsvit_draft.txt
