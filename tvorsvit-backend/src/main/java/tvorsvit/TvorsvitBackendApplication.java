@@ -1,13 +1,13 @@
-package trovsvit_backend;
+package tvorsvit;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TrovsvitBackendApplication {
+public class TvorsvitBackendApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TrovsvitBackendApplication.class, args);
+		SpringApplication.run(TvorsvitBackendApplication.class, args);
 	}
 
 }

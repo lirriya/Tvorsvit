@@ -5,20 +5,17 @@ function App() {
   const [textDraft, setTextDraft] = useState('');
 
   const handleSave = async () => {
-    // If the box is empty, don't bother sending anything
     if (!textDraft.trim()) {
       alert("Please write something before saving!");
       return;
     }
 
     try {
-      // We send a POST request to our Java server on port 8081
       const response = await fetch('http://localhost:8081/api/save-test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        // We pack the text into a clean JSON string
         body: JSON.stringify({ textContent: textDraft }),
       });
 
@@ -35,8 +32,8 @@ function App() {
 
   return (
     <div className="workspace">
-      <h1>Trovsvit Workspace</h1>
-      
+      <h1>Tvorsvit Workspace</h1>
+
       <textarea
         placeholder="Start writing your world's history here..."
         value={textDraft}
@@ -44,9 +41,9 @@ function App() {
         rows={15}
         cols={60}
       />
-      
+
       <br />
-      
+
       <button onClick={handleSave} className="save-btn">
         Save Draft to PC
       </button>

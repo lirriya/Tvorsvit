@@ -1,10 +1,10 @@
-package trovsvit_backend;
+package tvorsvit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class TrovsvitBackendApplicationTests {
+class TvorsvitBackendApplicationTests {
 
 	@Test
 	void contextLoads() {

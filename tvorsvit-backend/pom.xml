@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.portfolio</groupId>
-	<artifactId>trovsvit-backend</artifactId>
+	<artifactId>tvorsvit-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>tvorsvit-backend</name>
+	<description>Tvorsvit backend - local-first worldbuilding REST API</description>
 	<url/>
 	<licenses>
 		<license/>
