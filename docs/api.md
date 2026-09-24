@@ -11,6 +11,7 @@ Base URL: `http://localhost:8081` · Content type: `application/json` · CORS: `
 | POST | `/api/worlds` | Create a world | 201 (created body) |
 | GET | `/api/worlds/{id}` | Fetch one world | 200 |
 | PUT | `/api/worlds/{id}` | Update name / type / description / color | 200 (updated body) |
+| PUT | `/api/worlds/{id}/content` | Update only the editor text | 200 (updated body) |
 | DELETE | `/api/worlds/{id}` | Delete a world | 204 |
 
 Errors: unknown id → `404`; validation or malformed payload → `400`.
@@ -37,7 +38,7 @@ Errors: unknown id → `404`; validation or malformed payload → `400`.
 | type | string | required, one of `BOOK` `TABLETOP_RPG` `GAME_LORE` `SHORT_STORY` `SCREENPLAY` `COMIC` `OTHER` |
 | description | string | optional, max 300 |
 | color | string | optional hex accent, e.g. `#646cff` |
-| content | string | reserved for the editor; not settable through this API yet |
+| content | string | editor text; set via `PUT /api/worlds/{id}/content` |
 | createdAt / updatedAt | ISO-8601 string | timestamps |
 
 `type` values are documented in `docs/data-model.md`.
@@ -65,6 +66,19 @@ Minimal valid request — only `name` and `type` are required:
 ```json
 { "name": "Skyrim", "type": "GAME_LORE" }
 ```
+
+## Example: save content
+
+The world's content (editor text) is updated separately from its metadata:
+
+```http
+PUT /api/worlds/1/content
+Content-Type: application/json
+
+{ "content": "Chapter one. The valley slept." }
+```
+
+Response `200 OK` (the updated world, with `content` filled in). The metadata `PUT /{id}` deliberately ignores `content`, so editing world info can never wipe the user's writing.
 
 ## Validation rules
 

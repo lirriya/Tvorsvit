@@ -6,7 +6,7 @@ Tvorsvit is a local-first worldbuilding and creative writing app. It lets you wr
 
 ## Status
 
-Early stage. Currently a full-stack prototype: a React frontend backed by a Spring Boot REST API that stores worlds in an embedded H2 database on your PC. A worlds dashboard (landing page) and editor are in progress; the API and data layer for them are done.
+Early stage. Currently a full-stack prototype: a React SPA with a **worlds dashboard** (`/`) and a **writing editor** (`/worlds/:id`), backed by a Spring Boot REST API that stores worlds in an embedded H2 database on your PC.
 
 ## Tech stack
 
@@ -32,7 +32,7 @@ tvorsvit-frontend/   React + Vite SPA (port 5173)
 ```mermaid
 flowchart LR
     subgraph PC [User's PC]
-        F[React SPA - Vite :5173] -->|GET / POST / PUT / DELETE /api/worlds| B
+        F[React SPA - Vite :5173] -->|same-origin /api/* - proxied to :8081| B
         subgraph BE [Spring Boot :8081]
             B[WorldController] --> R[WorldRepository]
             R --> DB[(H2 file - data/tvorsvit.mv.db)]
@@ -58,7 +58,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. The app talks to the REST API on port 8081 (CORS is configured for the Vite dev server). While developing you can inspect the database directly at http://localhost:8081/h2-console (JDBC URL `jdbc:h2:file:./data/tvorsvit`). See `docs/api.md` for the endpoint reference and `docs/data-model.md` for the schema.
+Open http://localhost:5173. The Vite dev server proxies `/api` requests to the backend on port 8081, so the SPA stays same-origin. While developing you can inspect the database directly at http://localhost:8081/h2-console (JDBC URL `jdbc:h2:file:./data/tvorsvit`). See `docs/api.md` for the endpoint reference, `docs/data-model.md` for the schema, and `docs/frontend.md` for the SPA structure and data flow.
 
 ## Roadmap
 

@@ -53,6 +53,14 @@ public class WorldController {
         return repository.save(world);
     }
 
+    @PutMapping("/{id}/content")
+    public World updateContent(@PathVariable Long id, @RequestBody ContentRequest request) {
+        World world = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "World not found: " + id));
+        world.setContent(request.content());
+        return repository.save(world);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!repository.existsById(id)) {

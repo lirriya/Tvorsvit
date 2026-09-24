@@ -137,6 +137,29 @@ class WorldControllerTests {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void updateContentPersistsText() throws Exception {
+        long id = createWorld("Writings", "BOOK");
+
+        mockMvc.perform(put("/api/worlds/{id}/content", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\":\"Chapter one. The valley slept.\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value("Chapter one. The valley slept."));
+
+        mockMvc.perform(get("/api/worlds/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value("Chapter one. The valley slept."));
+    }
+
+    @Test
+    void updateContentOnMissingWorldReturns404() throws Exception {
+        mockMvc.perform(put("/api/worlds/999999/content")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\":\"nowhere\"}"))
+                .andExpect(status().isNotFound());
+    }
+
     private long createWorld(String name, String type) throws Exception {
         String body = mockMvc.perform(post("/api/worlds")
                         .contentType(MediaType.APPLICATION_JSON)

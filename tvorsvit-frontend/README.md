@@ -1,11 +1,12 @@
 # Tvorsvit Frontend
 
-React + Vite single-page application for the Tvorsvit worldbuilding app. Currently a minimal workspace: a draft textarea that saves content to the Tvorsvit backend via `POST /api/save-test`.
+React + Vite single-page application for the Tvorsvit worldbuilding app — a worlds dashboard (`/`) and a world editor (`/worlds/:id`), backed by the Spring Boot REST API.
 
 ## Stack
 
 - React 19
-- Vite
+- Vite (dev proxy: `/api` → `http://localhost:8081`)
+- react-router-dom
 - ESLint (eslint-plugin-react-hooks, eslint-plugin-react-refresh)
 
 ## Scripts
@@ -19,4 +20,4 @@ React + Vite single-page application for the Tvorsvit worldbuilding app. Current
 
 ## Dev flow
 
-Run the backend first (see the root [README](../README.md)), then `npm run dev`. The frontend calls the backend at `http://localhost:8081`, which is allowed via CORS on the backend.
+Run the backend first (see the root [README](../README.md)), then `npm run dev`. The Vite dev server proxies `/api` requests to the backend at `http://localhost:8081`, so the SPA stays same-origin. See [docs/frontend.md](../docs/frontend.md) for the app structure and data flow.
