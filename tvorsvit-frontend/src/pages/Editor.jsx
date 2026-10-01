@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getWorld, saveWorldContent } from '../api.js';
+import { getWorld, listCharacters, saveWorldContent } from '../api.js';
 import { typeLabel } from '../worldTypes.js';
 
 function Editor() {
@@ -11,6 +11,7 @@ function Editor() {
   const [saveState, setSaveState] = useState('saved');
   const [loadError, setLoadError] = useState(null);
   const [saveError, setSaveError] = useState(null);
+  const [characterCount, setCharacterCount] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,6 +26,18 @@ function Editor() {
       .catch((err) => {
         if (!cancelled) setLoadError(err.message);
       });
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    listCharacters(id)
+      .then((characters) => {
+        if (!cancelled) setCharacterCount(characters.length);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -79,6 +92,9 @@ function Editor() {
       <div className="editor-toolbar">
         <Link to="/" className="back-link">
           ← All worlds
+        </Link>
+        <Link to={`/worlds/${id}/characters`} className="btn btn-secondary">
+          Characters{characterCount === null ? '' : ` (${characterCount})`}
         </Link>
         <span
           className={`save-status${saveState === 'saved' ? ' is-saved' : ''}${saveState === 'error' ? ' is-error' : ''}`}
