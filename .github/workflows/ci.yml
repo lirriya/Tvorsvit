@@ -27,6 +27,7 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
+          cache-dependency-path: tvorsvit-backend/pom.xml
       - run: chmod +x mvnw && ./mvnw --batch-mode test
 
   frontend:
@@ -41,6 +42,7 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+          cache-dependency-path: tvorsvit-frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
       - run: npm run build
