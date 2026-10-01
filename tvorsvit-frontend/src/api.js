@@ -33,3 +33,19 @@ export function getWorld(id) {
 export function saveWorldContent(id, content) {
   return request(`/worlds/${id}/content`, { method: 'PUT', body: JSON.stringify({ content }) });
 }
+
+export function listCharacters(worldId) {
+  return request(`/worlds/${worldId}/characters`);
+}
+
+export function createCharacter(worldId, payload) {
+  return request(`/worlds/${worldId}/characters`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export function updateCharacter(worldId, id, payload) {
+  return request(`/worlds/${worldId}/characters/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+}
+
+export function deleteCharacter(worldId, id) {
+  return request(`/worlds/${worldId}/characters/${id}`, { method: 'DELETE' });
+}
