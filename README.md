@@ -1,5 +1,7 @@
 # Tvorsvit
 
+[![CI](https://github.com/lirriya/Tvorsvit/actions/workflows/ci.yml/badge.svg)](https://github.com/lirriya/Tvorsvit/actions/workflows/ci.yml)
+
 **твори світ** — "create a world"
 
 Tvorsvit is a local-first worldbuilding and creative writing app. It lets you write novels and drafts in a distraction-free editor while building out your world: character cards, location cards, relationship links, and a graph view connecting everything by relationship, location, or shared person. All data is stored on your own PC.
