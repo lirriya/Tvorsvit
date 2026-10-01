@@ -8,7 +8,7 @@ Tvorsvit is a local-first worldbuilding and creative writing app. It lets you wr
 
 ## Status
 
-Early stage. Currently a full-stack prototype: a React workspace that sends draft text to a Spring Boot backend, which saves it to a local file.
+Early stage. Currently a full-stack prototype: a React SPA with a **worlds dashboard** (`/`) and a **writing editor** (`/worlds/:id`), backed by a Spring Boot REST API that stores worlds in an embedded H2 database on your PC.
 
 ## Tech stack
 
@@ -16,7 +16,7 @@ Early stage. Currently a full-stack prototype: a React workspace that sends draf
 |---|---|
 | Frontend | React 19, Vite, JavaScript (JSX) |
 | Backend | Java 25, Spring Boot 4.1, Maven |
-| Storage | Local file (currently), embedded database planned |
+| Storage | H2 embedded file database (`data/tvorsvit.mv.db`) |
 | Testing | JUnit 5 / Spring Boot Test |
 
 ## Repo structure
@@ -34,9 +34,10 @@ tvorsvit-frontend/   React + Vite SPA (port 5173)
 ```mermaid
 flowchart LR
     subgraph PC [User's PC]
-        F[React SPA - Vite :5173] -->|POST /api/save-test| B
+        F[React SPA - Vite :5173] -->|same-origin /api/* - proxied to :8081| B
         subgraph BE [Spring Boot :8081]
-            B[SaveController] --> F1[(tvorsvit_draft.txt)]
+            B[WorldController] --> R[WorldRepository]
+            R --> DB[(H2 file - data/tvorsvit.mv.db)]
             B --> S[StatusController]
         end
     end
@@ -59,12 +60,11 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173, type your draft, and hit **Save Draft to PC**. The text is written to `tvorsvit_draft.txt` in the backend working directory.
+Open http://localhost:5173. The Vite dev server proxies `/api` requests to the backend on port 8081, so the SPA stays same-origin. While developing you can inspect the database directly at http://localhost:8081/h2-console (JDBC URL `jdbc:h2:file:./data/tvorsvit`). See `docs/api.md` for the endpoint reference, `docs/data-model.md` for the schema, and `docs/frontend.md` for the SPA structure and data flow.
 
 ## Roadmap
 
 - Editor with autosave (Google-Docs-style editing)
 - Character and location cards
 - Relationship links and graph view
-- Embedded local database (H2/SQLite file mode)
 - Authorisation and optional server-hosted data mode

@@ -5,6 +5,7 @@
 
 # Backend ignores
 **/target/
+**/data/
 **/.idea/
 **/data/
 **/*.iml
