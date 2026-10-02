@@ -5,6 +5,11 @@
   flex-direction: column;
 }
 
+.world-themed {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
 .status-text {
   text-align: center;
   padding: 48px 24px;
@@ -241,26 +246,92 @@
   margin-top: 12px;
 }
 
-.field-color {
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-}
-
-.field-color input[type='color'] {
-  width: 46px;
-  height: 32px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: transparent;
-  cursor: pointer;
-}
-
 .color-hex {
   font-family: var(--font-mono);
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+.theme-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.theme-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.theme-chip:hover {
+  border-color: var(--accent-border);
+}
+
+.theme-chip.is-active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.theme-chip-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.theme-menu-wrap {
+  position: relative;
+}
+
+.theme-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.theme-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 41;
+  width: 232px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: modal-in 0.15s ease-out;
+}
+
+.theme-menu-title {
+  padding: 2px 6px 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.theme-menu .theme-chip {
+  width: 100%;
 }
 
 .modal-actions {

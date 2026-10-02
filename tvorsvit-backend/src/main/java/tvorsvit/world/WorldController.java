@@ -75,5 +75,6 @@ public class WorldController {
         world.setType(request.type());
         world.setDescription(request.description());
         world.setColor(request.color());
+        world.setTheme(request.theme());
     }
 }

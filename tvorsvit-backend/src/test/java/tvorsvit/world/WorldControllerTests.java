@@ -42,13 +42,14 @@ class WorldControllerTests {
     void createPersistsWorldAndReturns201() throws Exception {
         mockMvc.perform(post("/api/worlds")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Middle-earth\",\"type\":\"BOOK\",\"description\":\"A long ago age\",\"color\":\"#646cff\"}"))
+                        .content("{\"name\":\"Middle-earth\",\"type\":\"BOOK\",\"description\":\"A long ago age\",\"color\":\"#a78bfa\",\"theme\":\"forest\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value("Middle-earth"))
                 .andExpect(jsonPath("$.type").value("BOOK"))
                 .andExpect(jsonPath("$.description").value("A long ago age"))
-                .andExpect(jsonPath("$.color").value("#646cff"))
+                .andExpect(jsonPath("$.color").value("#a78bfa"))
+                .andExpect(jsonPath("$.theme").value("forest"))
                 .andExpect(jsonPath("$.createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.updatedAt").isNotEmpty());
 

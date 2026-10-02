@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { createWorld } from '../api.js';
+import { WORLD_THEMES } from '../worldThemes.js';
 import { WORLD_TYPES } from '../worldTypes.js';
 
-const EMPTY_FORM = { name: '', type: '', description: '', color: '#646cff' };
+const EMPTY_FORM = { name: '', type: '', description: '', theme: WORLD_THEMES[0].key };
 
 function CreateWorldModal({ onClose, onCreated }) {
   const [form, setForm] = useState(EMPTY_FORM);
@@ -47,11 +48,13 @@ function CreateWorldModal({ onClose, onCreated }) {
 
     setSubmitting(true);
     try {
+      const selectedTheme = WORLD_THEMES.find((theme) => theme.key === form.theme);
       const created = await createWorld({
         name: form.name.trim(),
         type: form.type,
         description: form.description.trim() || null,
-        color: form.color,
+        theme: selectedTheme.key,
+        color: selectedTheme.dot,
       });
       onCreated(created);
     } catch (err) {
@@ -108,16 +111,26 @@ function CreateWorldModal({ onClose, onCreated }) {
             />
           </label>
 
-          <label className="field field-color">
-            <span className="field-label">Accent color</span>
-            <input
-              type="color"
-              value={form.color}
-              onChange={(event) => setField('color', event.target.value)}
-              aria-label="Accent color"
-            />
-            <span className="color-hex">{form.color}</span>
-          </label>
+          <div className="field">
+            <span className="field-label">World theme</span>
+            <div className="theme-chips" role="group" aria-label="World theme">
+              {WORLD_THEMES.map((theme) => (
+                <button
+                  key={theme.key}
+                  type="button"
+                  className={`theme-chip${form.theme === theme.key ? ' is-active' : ''}`}
+                  aria-pressed={form.theme === theme.key}
+                  onClick={() => setField('theme', theme.key)}
+                >
+                  <span className="theme-chip-dot" style={{ background: theme.dot }} aria-hidden="true" />
+                  {theme.label}
+                </button>
+              ))}
+            </div>
+            <span className="color-hex">
+              Accent · {WORLD_THEMES.find((theme) => theme.key === form.theme).dot}
+            </span>
+          </div>
 
           {errors.form && <p className="field-error form-error">{errors.form}</p>}
 

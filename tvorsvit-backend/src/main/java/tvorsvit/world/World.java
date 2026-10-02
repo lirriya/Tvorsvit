@@ -31,6 +31,9 @@ public class World extends BaseEntity {
     @Column(length = 7)
     private String color;
 
+    @Column(length = 30)
+    private String theme;
+
     @Column(length = 1000000)
     private String content;
 
@@ -68,6 +71,14 @@ public class World extends BaseEntity {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getTheme() {
+        return theme;
+    }
+
+    public void setTheme(String theme) {
+        this.theme = theme;
     }
 
     public String getContent() {

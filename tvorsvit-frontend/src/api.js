@@ -34,6 +34,10 @@ export function saveWorldContent(id, content) {
   return request(`/worlds/${id}/content`, { method: 'PUT', body: JSON.stringify({ content }) });
 }
 
+export function updateWorld(id, payload) {
+  return request(`/worlds/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+}
+
 export function listCharacters(worldId) {
   return request(`/worlds/${worldId}/characters`);
 }

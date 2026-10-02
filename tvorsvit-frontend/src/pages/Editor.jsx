@@ -1,8 +1,31 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getWorld, listCharacters, saveWorldContent } from '../api.js';
+import { getWorld, listCharacters, saveWorldContent, updateWorld } from '../api.js';
 import { typeLabel } from '../worldTypes.js';
 import ThemeToggle from '../components/ThemeToggle.jsx';
+import { WORLD_THEMES, themeOf } from '../worldThemes.js';
+
+function PaletteIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="8.6" />
+      <circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none" />
+      <circle cx="8" cy="7.6" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="16.3" cy="8.6" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="17" cy="14.6" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
 
 function Editor() {
   const { id } = useParams();
@@ -14,6 +37,7 @@ function Editor() {
   const [saveError, setSaveError] = useState(null);
   const [characterCount, setCharacterCount] = useState(null);
   const [focusMode, setFocusMode] = useState(false);
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const prevFocus = useRef(false);
 
   useEffect(() => {
@@ -72,6 +96,7 @@ function Editor() {
         setFocusMode((current) => !current);
       } else if (event.key === 'Escape') {
         setFocusMode(false);
+        setThemeMenuOpen(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -114,6 +139,28 @@ function Editor() {
     }
   };
 
+  const handleThemeSelect = async (key) => {
+    const theme = WORLD_THEMES.find((entry) => entry.key === key);
+    setThemeMenuOpen(false);
+    setSaveState('saving');
+    setSaveError(null);
+    try {
+      const updated = await updateWorld(id, {
+        name: world.name,
+        type: world.type,
+        description: world.description,
+        color: theme.dot,
+        theme: key,
+      });
+      setWorld(updated);
+      setDirty(false);
+      setSaveState('saved');
+    } catch (err) {
+      setSaveState('error');
+      setSaveError(err.message);
+    }
+  };
+
   if (loadError) {
     return (
       <div className="error-page">
@@ -140,7 +187,8 @@ function Editor() {
 
   if (focusMode) {
     return (
-      <div className="focus-canvas">
+      <div className="world-themed" data-world-theme={themeOf(world)}>
+        <div className="focus-canvas">
         <div className="focus-topbar">
           <span className="focus-hint">Esc or Ctrl/⌘+Shift+F to exit focus mode</span>
           {(saveState === 'saving' || saveState === 'error') && (
@@ -154,12 +202,14 @@ function Editor() {
           placeholder="Start writing this world's history…"
           autoFocus
         />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="editor-layout" style={{ '--accent': world.color || '#646cff' }}>
+    <div className="world-themed" data-world-theme={themeOf(world)}>
+      <div className="editor-layout">
       <div className="editor-toolbar">
         <Link to="/" className="back-link">
           ← All worlds
@@ -168,6 +218,44 @@ function Editor() {
           Characters{characterCount === null ? '' : ` (${characterCount})`}
         </Link>
         <ThemeToggle />
+        <div className="theme-menu-wrap">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => setThemeMenuOpen((open) => !open)}
+            aria-expanded={themeMenuOpen}
+            aria-label="World theme"
+            title="World theme"
+          >
+            <PaletteIcon />
+          </button>
+          {themeMenuOpen && (
+            <>
+              <button
+                type="button"
+                className="theme-menu-backdrop"
+                tabIndex={-1}
+                aria-label="Close theme menu"
+                onClick={() => setThemeMenuOpen(false)}
+              />
+              <div className="theme-menu">
+                <span className="theme-menu-title">World theme</span>
+                {WORLD_THEMES.map((theme) => (
+                  <button
+                    key={theme.key}
+                    type="button"
+                    className={`theme-chip${themeOf(world) === theme.key ? ' is-active' : ''}`}
+                    aria-pressed={themeOf(world) === theme.key}
+                    onClick={() => handleThemeSelect(theme.key)}
+                  >
+                    <span className="theme-chip-dot" style={{ background: theme.dot }} aria-hidden="true" />
+                    {theme.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
         <button
           type="button"
           className="btn btn-secondary"
@@ -206,6 +294,7 @@ function Editor() {
         onChange={handleChange}
         placeholder="Start writing this world's history…"
       />
+      </div>
     </div>
   );
 }

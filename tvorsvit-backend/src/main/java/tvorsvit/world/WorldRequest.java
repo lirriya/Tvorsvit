@@ -7,5 +7,6 @@ public record WorldRequest(
         @NotBlank String name,
         @NotNull WorldType type,
         String description,
-        String color) {
+        String color,
+        String theme) {
 }
