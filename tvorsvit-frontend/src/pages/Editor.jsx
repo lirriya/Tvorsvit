@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getWorld, listCharacters, saveWorldContent } from '../api.js';
 import { typeLabel } from '../worldTypes.js';
+import ThemeToggle from '../components/ThemeToggle.jsx';
 
 function Editor() {
   const { id } = useParams();
@@ -96,6 +97,7 @@ function Editor() {
         <Link to={`/worlds/${id}/characters`} className="btn btn-secondary">
           Characters{characterCount === null ? '' : ` (${characterCount})`}
         </Link>
+        <ThemeToggle />
         <span
           className={`save-status${saveState === 'saved' ? ' is-saved' : ''}${saveState === 'error' ? ' is-error' : ''}`}
         >

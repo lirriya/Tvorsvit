@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { deleteCharacter, getWorld, listCharacters } from '../api.js';
 import CharacterCard from '../components/CharacterCard.jsx';
 import CharacterModal from '../components/CharacterModal.jsx';
+import ThemeToggle from '../components/ThemeToggle.jsx';
 import { typeLabel } from '../worldTypes.js';
 
 function Characters() {
@@ -104,6 +105,7 @@ function Characters() {
         </Link>
         <h1>Characters</h1>
         <span className="type-badge">{typeLabel(world.type)}</span>
+        <ThemeToggle />
       </div>
 
       {loadError && (

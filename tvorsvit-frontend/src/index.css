@@ -1,18 +1,70 @@
 :root {
-  --bg: #16171d;
-  --bg-elevated: #242424;
-  --bg-input: #1a1a1a;
-  --border: #2e303a;
-  --text: #e0e0e0;
-  --text-muted: #9ca3af;
-  --accent: #646cff;
-  --accent-strong: #535bf2;
-  --accent-bg: rgba(100, 108, 255, 0.12);
-  --accent-border: rgba(100, 108, 255, 0.35);
-  --success: #4ade80;
-  --danger: #f87171;
+  color-scheme: light;
+
+  --bg: #fbf8f4;
+  --bg-elevated: #ffffff;
+  --bg-input: #f5f1fb;
+
+  --border: #ece6df;
+
+  --text: #4a4259;
+  --text-muted: #8d86a3;
+
+  --accent: #a78bfa;
+  --accent-strong: #8b5cf6;
+  --accent-contrast: #2e2148;
+  --accent-bg: rgba(167, 139, 250, 0.14);
+  --accent-border: rgba(167, 139, 250, 0.35);
+
+  --success: #4fae82;
+  --danger: #dd8091;
+  --danger-bg: rgba(221, 128, 145, 0.12);
+  --danger-border: rgba(221, 128, 145, 0.42);
+
+  --scrim: rgba(74, 60, 120, 0.32);
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 3px rgba(60, 42, 120, 0.06), 0 4px 14px rgba(60, 42, 120, 0.07);
+  --shadow-md: 0 4px 10px rgba(60, 42, 120, 0.08), 0 10px 28px rgba(60, 42, 120, 0.12);
+  --shadow-lg: 0 10px 24px rgba(60, 42, 120, 0.12), 0 24px 60px rgba(60, 42, 120, 0.16);
+
+  --font-ui: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-editor: 'Quicksand', var(--font-ui);
+  --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
+}
+
+html[data-theme='dark'] {
   color-scheme: dark;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  --bg: #1a1724;
+  --bg-elevated: #241f33;
+  --bg-input: #2d2742;
+
+  --border: #3b3454;
+
+  --text: #ece8f7;
+  --text-muted: #a49cc2;
+
+  --accent: #c3adff;
+  --accent-strong: #d7c8ff;
+  --accent-contrast: #241a35;
+  --accent-bg: rgba(195, 173, 255, 0.16);
+  --accent-border: rgba(195, 173, 255, 0.38);
+
+  --success: #7cd7ab;
+  --danger: #efa1ae;
+  --danger-bg: rgba(239, 161, 174, 0.14);
+  --danger-border: rgba(239, 161, 174, 0.4);
+
+  --scrim: rgba(8, 6, 16, 0.58);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.34), 0 10px 28px rgba(0, 0, 0, 0.32);
+  --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.38), 0 24px 60px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -25,10 +77,18 @@ body,
   min-height: 100vh;
 }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   margin: 0;
   background-color: var(--bg);
   color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 h1,
@@ -49,4 +109,9 @@ select:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent-bg);
+  color: var(--text);
 }
