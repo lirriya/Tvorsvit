@@ -281,8 +281,14 @@ function CreateWorldModal({ onClose, onCreated }) {
               value={form.description}
               onChange={(event) => setField('description', event.target.value)}
               rows={3}
+              maxLength={500}
               placeholder="What is this world about? (optional)"
             />
+            <span
+              className={`field-counter${form.description.length >= 400 ? ' is-near' : ''}${form.description.length >= 500 ? ' is-max' : ''}`}
+            >
+              {form.description.length}/500
+            </span>
           </label>
 
           <div className="field">

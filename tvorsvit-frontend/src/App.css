@@ -730,6 +730,29 @@
   line-height: 1.5;
 }
 
+.paper-description,
+.world-card-description,
+.character-card-description {
+  overflow-wrap: break-word;
+}
+
+.field-counter {
+  display: block;
+  text-align: right;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.field-counter.is-near {
+  color: var(--warn);
+}
+
+.field-counter.is-max {
+  color: var(--danger);
+  font-weight: 700;
+}
+
 .paper-error {
   margin-top: 10px;
 }

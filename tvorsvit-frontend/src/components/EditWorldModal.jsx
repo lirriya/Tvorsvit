@@ -111,8 +111,14 @@ function EditWorldModal({ world, onClose, onSaved, onDeleted }) {
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               rows={3}
+              maxLength={500}
               placeholder="What is this world about? (optional)"
             />
+            <span
+              className={`field-counter${description.length >= 400 ? ' is-near' : ''}${description.length >= 500 ? ' is-max' : ''}`}
+            >
+              {description.length}/500
+            </span>
           </label>
 
           <div className="field">

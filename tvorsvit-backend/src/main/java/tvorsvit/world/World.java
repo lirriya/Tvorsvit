@@ -25,7 +25,7 @@ public class World extends BaseEntity {
     @Column(nullable = false, length = 30)
     private WorldType type;
 
-    @Column(length = 300)
+    @Column(length = 500)
     private String description;
 
     @Column(length = 7)

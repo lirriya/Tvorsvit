@@ -21,6 +21,8 @@
   --danger-bg: rgba(221, 128, 145, 0.12);
   --danger-border: rgba(221, 128, 145, 0.42);
 
+  --warn: #d98324;
+
   --scrim: rgba(74, 60, 120, 0.32);
 
   --radius-sm: 10px;
@@ -62,6 +64,8 @@ html[data-theme='dark'] {
   --danger: #efa1ae;
   --danger-bg: rgba(239, 161, 174, 0.14);
   --danger-border: rgba(239, 161, 174, 0.4);
+
+  --warn: #f0b35c;
 
   --scrim: rgba(8, 6, 16, 0.58);
 
