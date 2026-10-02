@@ -8,17 +8,21 @@
     <script>
       (function () {
         var theme = 'light';
+        var scale = 'md';
         try {
-          var stored = window.localStorage.getItem('tvorsvit-theme');
-          if (stored === 'dark' || stored === 'light') theme = stored;
+          var storedTheme = window.localStorage.getItem('tvorsvit-theme');
+          if (storedTheme === 'dark' || storedTheme === 'light') theme = storedTheme;
+          var storedScale = window.localStorage.getItem('tvorsvit-scale');
+          if (storedScale === 'lg' || storedScale === 'xl' || storedScale === 'md') scale = storedScale;
         } catch {}
         document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.scale = scale;
       })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@500;600;700&family=Nunito:wght@500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>

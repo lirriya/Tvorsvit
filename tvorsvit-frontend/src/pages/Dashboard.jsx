@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { listWorlds } from '../api.js';
 import WorldCard from '../components/WorldCard.jsx';
 import CreateWorldModal from '../components/CreateWorldModal.jsx';
-import ThemeToggle from '../components/ThemeToggle.jsx';
+import TopBar from '../components/TopBar.jsx';
 
 function Dashboard() {
   const [worlds, setWorlds] = useState(null);
@@ -31,13 +31,7 @@ function Dashboard() {
 
   return (
     <div className="app-shell">
-      <div className="app-corner">
-        <ThemeToggle />
-      </div>
-      <header className="app-header">
-        <h1>Tvorsvit</h1>
-        <p className="subtitle">твори світ — create a world</p>
-      </header>
+      <TopBar />
 
       {error && (
         <div className="error-banner">
