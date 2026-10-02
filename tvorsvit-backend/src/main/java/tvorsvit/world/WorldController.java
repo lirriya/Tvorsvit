@@ -20,6 +20,8 @@ import java.util.List;
 @RequestMapping("/api/worlds")
 public class WorldController {
 
+    private static final String DEFAULT_THEME = "lavender";
+
     private final WorldRepository repository;
 
     public WorldController(WorldRepository repository) {
@@ -28,7 +30,10 @@ public class WorldController {
 
     @GetMapping
     public List<World> list() {
-        return repository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        return repository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
+                .stream()
+                .map(this::ensureTheme)
+                .toList();
     }
 
     @PostMapping
@@ -41,8 +46,8 @@ public class WorldController {
 
     @GetMapping("/{id}")
     public World get(@PathVariable Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "World not found: " + id));
+        return ensureTheme(repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "World not found: " + id)));
     }
 
     @PutMapping("/{id}")
@@ -58,7 +63,7 @@ public class WorldController {
         World world = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "World not found: " + id));
         world.setContent(request.content());
-        return repository.save(world);
+        return ensureTheme(repository.save(world));
     }
 
     @DeleteMapping("/{id}")
@@ -75,6 +80,14 @@ public class WorldController {
         world.setType(request.type());
         world.setDescription(request.description());
         world.setColor(request.color());
-        world.setTheme(request.theme());
+        world.setTheme(request.theme() != null ? request.theme() : DEFAULT_THEME);
+    }
+
+    private World ensureTheme(World world) {
+        if (world.getTheme() == null) {
+            world.setTheme(DEFAULT_THEME);
+            return repository.save(world);
+        }
+        return world;
     }
 }

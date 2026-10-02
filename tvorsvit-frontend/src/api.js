@@ -38,6 +38,10 @@ export function updateWorld(id, payload) {
   return request(`/worlds/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
 }
 
+export function deleteWorld(id) {
+  return request(`/worlds/${id}`, { method: 'DELETE' });
+}
+
 export function listCharacters(worldId) {
   return request(`/worlds/${worldId}/characters`);
 }
