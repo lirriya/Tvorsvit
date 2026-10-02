@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getWorld, listCharacters, saveWorldContent } from '../api.js';
 import { typeLabel } from '../worldTypes.js';
@@ -13,6 +13,8 @@ function Editor() {
   const [loadError, setLoadError] = useState(null);
   const [saveError, setSaveError] = useState(null);
   const [characterCount, setCharacterCount] = useState(null);
+  const [focusMode, setFocusMode] = useState(false);
+  const prevFocus = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +45,54 @@ function Editor() {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (focusMode && dirty) {
+      const timer = setTimeout(() => {
+        setSaveState('saving');
+        saveWorldContent(id, content)
+          .then(() => {
+            setDirty(false);
+            setSaveState('saved');
+          })
+          .catch((err) => {
+            setSaveState('error');
+            setSaveError(err.message);
+          });
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [content, dirty, focusMode, id]);
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        setFocusMode((current) => !current);
+      } else if (event.key === 'Escape') {
+        setFocusMode(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const wasFocus = prevFocus.current;
+    prevFocus.current = focusMode;
+    if (wasFocus && !focusMode && dirty) {
+      saveWorldContent(id, content)
+        .then(() => {
+          setDirty(false);
+          setSaveState('saved');
+        })
+        .catch((err) => {
+          setSaveState('error');
+          setSaveError(err.message);
+        });
+    }
+  }, [content, dirty, focusMode, id]);
 
   const handleChange = (event) => {
     setContent(event.target.value);
@@ -88,6 +138,26 @@ function Editor() {
           ? 'Unsaved changes'
           : 'Saved';
 
+  if (focusMode) {
+    return (
+      <div className="focus-canvas">
+        <div className="focus-topbar">
+          <span className="focus-hint">Esc or Ctrl/⌘+Shift+F to exit focus mode</span>
+          {(saveState === 'saving' || saveState === 'error') && (
+            <span className={`save-status${saveState === 'error' ? ' is-error' : ''}`}>{statusText}</span>
+          )}
+        </div>
+        <textarea
+          className="focus-textarea"
+          value={content}
+          onChange={handleChange}
+          placeholder="Start writing this world's history…"
+          autoFocus
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="editor-layout" style={{ '--accent': world.color || '#646cff' }}>
       <div className="editor-toolbar">
@@ -98,6 +168,14 @@ function Editor() {
           Characters{characterCount === null ? '' : ` (${characterCount})`}
         </Link>
         <ThemeToggle />
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setFocusMode(true)}
+          title="Focus mode (Ctrl/⌘+Shift+F)"
+        >
+          Focus
+        </button>
         <span
           className={`save-status${saveState === 'saved' ? ' is-saved' : ''}${saveState === 'error' ? ' is-error' : ''}`}
         >
