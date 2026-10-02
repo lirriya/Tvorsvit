@@ -1,8 +1,39 @@
 import { useCallback, useEffect, useState } from 'react';
 import { listWorlds } from '../api.js';
-import WorldCard from '../components/WorldCard.jsx';
 import CreateWorldModal from '../components/CreateWorldModal.jsx';
+import Footer from '../components/Footer.jsx';
 import TopBar from '../components/TopBar.jsx';
+import WorldCard from '../components/WorldCard.jsx';
+
+function Hero({ worlds, onCreate }) {
+  if (!worlds) return null;
+
+  if (worlds.length === 0) {
+    return (
+      <section className="hero">
+        <h1 className="hero-title">Tvorsvit</h1>
+        <p className="hero-tagline">твори світ — create a world</p>
+        <p className="hero-about">
+          A cozy home for building fictional worlds — lore, characters, and quiet writing time.
+        </p>
+        <div className="hero-actions">
+          <button type="button" className="btn btn-primary" onClick={onCreate}>
+            Create your first world
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="hero hero-slim">
+      <p className="hero-greeting">Welcome back</p>
+      <p className="hero-counts">
+        {worlds.length} {worlds.length === 1 ? 'world' : 'worlds'} on your shelf
+      </p>
+    </section>
+  );
+}
 
 function Dashboard() {
   const [worlds, setWorlds] = useState(null);
@@ -32,6 +63,7 @@ function Dashboard() {
   return (
     <div className="app-shell">
       <TopBar />
+      <Hero worlds={worlds} onCreate={() => setShowCreate(true)} />
 
       {error && (
         <div className="error-banner">
@@ -56,10 +88,19 @@ function Dashboard() {
             ))}
           </main>
           {worlds.length === 0 && (
-            <p className="empty-hint">No worlds yet — use the “+ Create new world” tile to start your first one.</p>
+            <div className="empty-state">
+              <span className="empty-state-emoji" aria-hidden="true">
+                📖
+              </span>
+              <p className="empty-state-text">
+                Your worlds are dreaming here — use the “+ Create new world” tile to wake the first one up.
+              </p>
+            </div>
           )}
         </>
       )}
+
+      <Footer />
 
       {showCreate && <CreateWorldModal onClose={() => setShowCreate(false)} onCreated={handleCreated} />}
     </div>

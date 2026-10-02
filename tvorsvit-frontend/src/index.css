@@ -32,7 +32,8 @@
   --shadow-md: 0 4px 10px rgba(60, 42, 120, 0.08), 0 10px 28px rgba(60, 42, 120, 0.12);
   --shadow-lg: 0 10px 24px rgba(60, 42, 120, 0.12), 0 24px 60px rgba(60, 42, 120, 0.16);
 
-  --gradient-hero: linear-gradient(135deg, rgba(167, 139, 250, 0.24) 0%, rgba(255, 179, 198, 0.32) 55%, rgba(255, 222, 196, 0.34) 100%);
+  --shadow-float: 0 1px 3px rgba(60, 42, 120, 0.05), 0 10px 24px -8px rgba(60, 42, 120, 0.14), 0 28px 60px -24px rgba(60, 42, 120, 0.18);
+  --shadow-float-lg: 0 2px 6px rgba(60, 42, 120, 0.06), 0 16px 32px -10px rgba(60, 42, 120, 0.2), 0 40px 80px -28px rgba(60, 42, 120, 0.26);
 
   --font-ui: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   --font-editor: 'Quicksand', var(--font-ui);
@@ -68,7 +69,8 @@ html[data-theme='dark'] {
   --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.34), 0 10px 28px rgba(0, 0, 0, 0.32);
   --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.38), 0 24px 60px rgba(0, 0, 0, 0.4);
 
-  --gradient-hero: linear-gradient(135deg, rgba(124, 58, 237, 0.3) 0%, rgba(167, 139, 250, 0.16) 55%, rgba(88, 28, 135, 0.28) 100%);
+  --shadow-float: 0 1px 3px rgba(0, 0, 0, 0.35), 0 10px 24px -8px rgba(0, 0, 0, 0.4), 0 28px 60px -24px rgba(0, 0, 0, 0.45);
+  --shadow-float-lg: 0 2px 6px rgba(0, 0, 0, 0.4), 0 16px 32px -10px rgba(0, 0, 0, 0.45), 0 40px 80px -28px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -99,7 +101,7 @@ body {
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-ui);
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.5;
 }
 
