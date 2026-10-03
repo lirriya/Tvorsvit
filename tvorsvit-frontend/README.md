@@ -1,16 +1,23 @@
-# React + Vite
+# Tvorsvit Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite single-page application for the Tvorsvit worldbuilding app — a worlds dashboard (`/`) and a world editor (`/worlds/:id`), backed by the Spring Boot REST API.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19
+- Vite (dev proxy: `/api` → `http://localhost:8081`)
+- react-router-dom
+- ESLint (eslint-plugin-react-hooks, eslint-plugin-react-refresh)
 
-## React Compiler
+## Scripts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Script | Purpose |
+|---|---|
+| `npm run dev` | Start Vite dev server on http://localhost:5173 |
+| `npm run build` | Production build to `dist/` |
+| `npm run lint` | ESLint check |
+| `npm run preview` | Preview the production build |
 
-## Expanding the ESLint configuration
+## Dev flow
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Run the backend first (see the root [README](../README.md)), then `npm run dev`. The Vite dev server proxies `/api` requests to the backend at `http://localhost:8081`, so the SPA stays same-origin. See [docs/frontend.md](../docs/frontend.md) for the app structure and data flow.
