@@ -13,7 +13,6 @@ function WorldCard({ world }) {
   const accent = world.color || DEFAULT_COLOR;
   return (
     <Link to={`/worlds/${world.id}`} className="world-card" style={{ '--accent': accent }}>
-      <span className="world-card-accent" aria-hidden="true" />
       <span className="world-card-body">
         <span className="world-card-title">{world.name}</span>
         <span className="type-badge">{typeLabel(world.type)}</span>

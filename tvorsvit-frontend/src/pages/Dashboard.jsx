@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
 import { listWorlds } from '../api.js';
 import CreateWorldModal from '../components/CreateWorldModal.jsx';
 import Footer from '../components/Footer.jsx';
@@ -51,6 +52,30 @@ function Dashboard() {
       });
   }, []);
 
+  const gridRef = useRef(null);
+  const didAnimate = useRef(false);
+
+  useLayoutEffect(() => {
+    if (!worlds || didAnimate.current) return undefined;
+    didAnimate.current = true;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    const ctx = gsap.context(() => {
+      const items = gridRef.current?.querySelectorAll('.world-card, .create-tile');
+      if (!items || items.length === 0) return;
+      gsap.from(items, {
+        y: 26,
+        opacity: 0,
+        scale: 0.95,
+        duration: 0.55,
+        ease: 'back.out(1.7)',
+        stagger: 0.06,
+        clearProps: 'all',
+      });
+    });
+    return () => ctx.revert();
+  }, [worlds]);
+
   useEffect(() => {
     fetchWorlds();
   }, [fetchWorlds]);
@@ -78,7 +103,7 @@ function Dashboard() {
 
       {worlds && (
         <>
-          <main className="world-grid">
+          <main className="world-grid" ref={gridRef}>
             <button type="button" className="create-tile" onClick={() => setShowCreate(true)}>
               <span className="create-tile-plus">+</span>
               <span>Create new world</span>
