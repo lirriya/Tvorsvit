@@ -1,17 +1,56 @@
-import { Route, Routes } from 'react-router-dom';
+import { useState } from 'react';
 import './App.css';
-import Dashboard from './pages/Dashboard.jsx';
-import About from './pages/About.jsx';
-import Workspace from './pages/Workspace.jsx';
 
 function App() {
+  const [textDraft, setTextDraft] = useState('');
+
+  const handleSave = async () => {
+    // If the box is empty, don't bother sending anything
+    if (!textDraft.trim()) {
+      alert("Please write something before saving!");
+      return;
+    }
+
+    try {
+      // We send a POST request to our Java server on port 8081
+      const response = await fetch('http://localhost:8081/api/save-test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // We pack the text into a clean JSON string
+        body: JSON.stringify({ textContent: textDraft }),
+      });
+
+      if (response.ok) {
+        alert("Text successfully broadcasted to Java backend!");
+      } else {
+        alert("Server responded, but something went wrong.");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      alert("Could not connect to Java backend. Is the server running?");
+    }
+  };
+
   return (
-    <Routes>
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/worlds/:id" element={<Workspace />} />
-      <Route path="/worlds/:id/:section" element={<Workspace />} />
-    </Routes>
+    <div className="workspace">
+      <h1>Trovsvit Workspace</h1>
+      
+      <textarea
+        placeholder="Start writing your world's history here..."
+        value={textDraft}
+        onChange={(e) => setTextDraft(e.target.value)}
+        rows={15}
+        cols={60}
+      />
+      
+      <br />
+      
+      <button onClick={handleSave} className="save-btn">
+        Save Draft to PC
+      </button>
+    </div>
   );
 }
 

@@ -5,12 +5,10 @@
 
 # Backend ignores
 **/target/
-**/data/
 **/.idea/
-**/data/
 **/*.iml
 **/.settings/
 **/.classpath
 **/.project
 
-tvorsvit_draft.txt
+trovsvit_draft.txt
