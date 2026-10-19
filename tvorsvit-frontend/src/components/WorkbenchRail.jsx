@@ -110,7 +110,7 @@ const RAIL_ITEMS = {
   timeline: TimelineIcon,
 };
 
-export default function WorkbenchRail({ worldId, charactersCount }) {
+export default function WorkbenchRail({ worldId, charactersCount, placesCount }) {
   const location = useLocation();
 
   return (
@@ -120,13 +120,17 @@ export default function WorkbenchRail({ worldId, charactersCount }) {
           key === 'story'
             ? `/worlds/${worldId}`
             : `/worlds/${worldId}/${key}`;
-        const label =
+        const count =
           key === 'characters' && typeof charactersCount === 'number'
-            ? `Characters (${charactersCount})`
-            : key
-                .split('-')
-                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
+            ? charactersCount
+            : key === 'places' && typeof placesCount === 'number'
+              ? placesCount
+              : null;
+        const baseLabel = key
+          .split('-')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        const label = count !== null ? `${baseLabel} (${count})` : baseLabel;
         return (
           <Link key={key} to={to} className={`rail-item${location.pathname === to ? ' is-active' : ''}`}>
             <Icon />

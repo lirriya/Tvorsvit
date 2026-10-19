@@ -17,6 +17,18 @@ Base URL: `http://localhost:8081` · Content type: `application/json` · CORS: `
 | POST | `/api/worlds/{id}/characters` | Create a character in a world | 201 (created body) |
 | PUT | `/api/worlds/{id}/characters/{characterId}` | Update a character | 200 (updated body) |
 | DELETE | `/api/worlds/{id}/characters/{characterId}` | Delete a character | 204 |
+| GET | `/api/worlds/{id}/places` | List places of a world, creation order | 200 |
+| POST | `/api/worlds/{id}/places` | Create a place in a world | 201 (created body) |
+| PUT | `/api/worlds/{id}/places/{placeId}` | Update a place | 200 (updated body) |
+| DELETE | `/api/worlds/{id}/places/{placeId}` | Delete a place | 204 |
+| GET | `/api/worlds/{id}/place-relations` | List place↔place relations, optionally `?placeId=` | 200 |
+| POST | `/api/worlds/{id}/place-relations` | Create a place↔place relation | 201 (created body) |
+| PUT | `/api/worlds/{id}/place-relations/{relationId}` | Update a place relation | 200 (updated body) |
+| DELETE | `/api/worlds/{id}/place-relations/{relationId}` | Delete a place relation | 204 |
+| GET | `/api/worlds/{id}/character-relations` | List character↔character relations, optionally `?characterId=` | 200 |
+| POST | `/api/worlds/{id}/character-relations` | Create a character↔character relation | 201 (created body) |
+| PUT | `/api/worlds/{id}/character-relations/{relationId}` | Update a character relation | 200 (updated body) |
+| DELETE | `/api/worlds/{id}/character-relations/{relationId}` | Delete a character relation | 204 |
 
 Errors: unknown id → `404`; validation or malformed payload → `400`.
 

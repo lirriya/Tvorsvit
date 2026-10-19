@@ -10,13 +10,28 @@ src/
   App.jsx                  route table
   api.js                   REST client (one fetch wrapper + semantic functions)
   worldTypes.js            enum → label mapping shared by card and modal
+  worldThemes.js           world theme registry (dots + labels)
+  colorLibrary.js          curated palette + localStorage color library/recent
+  placeRelationTypes.js    place relation enum → label mapping
+  characterRelationTypes.js character relation enum → label mapping
   index.css / App.css      global base + component styles
   components/
     WorldCard.jsx          card that links to /worlds/:id
     CreateWorldModal.jsx   create form as a modal dialog
+    EditWorldModal.jsx     edit / delete a world
+    CharacterCard.jsx      card for a character (accent, name, description)
+    CharacterDetails.jsx   read-only character view (fields, custom fields, relations)
+    CharacterModal.jsx     create/edit a character (one component, two modes)
+    CharacterRelationsPanel.jsx  character↔character relations (in CharacterModal)
+    PlaceCard.jsx          card for a place (photo, name, description)
+    PlaceModal.jsx         create/edit a place (one component, two modes)
+    PlaceRelationsPanel.jsx place↔place relations (in PlaceModal)
+    CustomFieldsEditor.jsx reusable label/value custom-field editor
+    ColorPicker.jsx        shared accent color picker + library
+    WorkbenchRail.jsx      world section nav with live counts
   pages/
     Dashboard.jsx          "/" — world grid + "+ Create new world" tile
-    Editor.jsx             "/worlds/:id" — write and save content
+    Workspace.jsx          "/worlds/:id/:section?" — editor + characters + places
 ```
 
 ## Routes
@@ -25,12 +40,14 @@ src/
 flowchart LR
     BrowserRouter --> Root{/}
     Root -->|"/"| Dashboard["Dashboard — world grid + create tile"]
-    Root -->|"/worlds/:id"| Editor["Editor — content writing"]
-    Dashboard -->|card click| Editor
-    Editor -->|"← All worlds"| Dashboard
+    Root -->|"/worlds/:id"| Workspace["Workspace — story editor"]
+    Workspace -->|"/:section=characters"| Characters["Characters grid"]
+    Workspace -->|"/:section=places"| Places["Places grid"]
+    Dashboard -->|card click| Workspace
+    Workspace -->|"← All worlds"| Dashboard
 ```
 
-The URL is the source of truth: the editor knows *which* world to show from `:id` (via `useParams`), and both views are deep-linkable (back/forward, bookmarks, refresh all work).
+The URL is the source of truth: the workspace knows *which* world and *which* section to show from the path params (`useParams`), and every view is deep-linkable (back/forward, bookmarks, refresh all work).
 
 ## Create flow
 
