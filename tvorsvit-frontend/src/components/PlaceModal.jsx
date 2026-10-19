@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPlace, updatePlace } from '../api.js';
+import ColorPicker from './ColorPicker.jsx';
 import PlaceRelationsPanel from './PlaceRelationsPanel.jsx';
 
 const DEFAULT_COLOR = '#646cff';
@@ -130,15 +131,14 @@ function PlaceModal({ worldId, place, places, onClose, onSaved }) {
             </div>
           )}
 
-          <label className="field field-color">
+          <div className="field field-color">
             <span className="field-label">Accent color</span>
-            <input
-              type="color"
+            <ColorPicker
               value={form.color}
-              onChange={(event) => setField('color', event.target.value)}
-              aria-label="Accent color"
+              onChange={(color) => setField('color', color)}
+              label="Accent color"
             />
-          </label>
+          </div>
 
           {errors.form && <p className="field-error form-error">{errors.form}</p>}
 

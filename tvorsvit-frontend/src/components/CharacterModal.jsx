@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createCharacter, listPlaces, updateCharacter } from '../api.js';
 import CharacterRelationsPanel from './CharacterRelationsPanel.jsx';
+import ColorPicker from './ColorPicker.jsx';
 
 const MBTI_TYPES = [
   'ISTJ', 'ISFJ', 'INFJ', 'INTJ',
@@ -264,15 +265,10 @@ function CharacterModal({ worldId, character, characters, onClose, onSaved }) {
             </label>
           </div>
 
-          <label className="field field-color">
+          <div className="field field-color">
             <span className="field-label">Accent color</span>
-            <input
-              type="color"
-              value={form.color}
-              onChange={(event) => setField('color', event.target.value)}
-              aria-label="Accent color"
-            />
-          </label>
+            <ColorPicker value={form.color} onChange={(color) => setField('color', color)} />
+          </div>
 
           {errors.form && <p className="field-error form-error">{errors.form}</p>}
 
