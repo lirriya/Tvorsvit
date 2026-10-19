@@ -73,3 +73,20 @@ export function updatePlace(worldId, id, payload) {
 export function deletePlace(worldId, id) {
   return request(`/worlds/${worldId}/places/${id}`, { method: 'DELETE' });
 }
+
+export function listPlaceRelations(worldId, placeId) {
+  const query = placeId != null ? `?placeId=${placeId}` : '';
+  return request(`/worlds/${worldId}/place-relations${query}`);
+}
+
+export function createPlaceRelation(worldId, payload) {
+  return request(`/worlds/${worldId}/place-relations`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export function updatePlaceRelation(worldId, id, payload) {
+  return request(`/worlds/${worldId}/place-relations/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+}
+
+export function deletePlaceRelation(worldId, id) {
+  return request(`/worlds/${worldId}/place-relations/${id}`, { method: 'DELETE' });
+}
