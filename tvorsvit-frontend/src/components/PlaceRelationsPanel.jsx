@@ -9,7 +9,7 @@ import { PLACE_RELATION_TYPES, describePlaceRelation } from '../placeRelationTyp
 
 const EMPTY_FORM = { toPlaceId: '', type: 'LOCATED_IN', customLabel: '', description: '', fromPlaceId: null };
 
-function PlaceRelationsPanel({ worldId, place, places }) {
+function PlaceRelationsPanel({ worldId, place, places, pending = [], onPendingChange }) {
   const [relations, setRelations] = useState(null);
   const [form, setForm] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -25,12 +25,14 @@ function PlaceRelationsPanel({ worldId, place, places }) {
   }, [worldId, place]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (place) {
+      load();
+    }
+  }, [place, load]);
 
   const nameOf = (id) => places.find((entry) => entry.id === id)?.name ?? `#${id}`;
 
-  const candidates = places.filter((entry) => entry.id !== place.id);
+  const candidates = places.filter((entry) => entry.id !== place?.id);
 
   const openCreate = () => {
     setEditingId(null);
@@ -38,14 +40,18 @@ function PlaceRelationsPanel({ worldId, place, places }) {
   };
 
   const openEdit = (relation) => {
-    setEditingId(relation.id);
-    const toPlaceId = relation.fromPlaceId === place.id ? relation.toPlaceId : relation.fromPlaceId;
+    setEditingId(place ? relation.id : relation.key);
+    const toPlaceId = place
+      ? relation.fromPlaceId === place.id
+        ? relation.toPlaceId
+        : relation.fromPlaceId
+      : relation.toPlaceId;
     setForm({
       toPlaceId: String(toPlaceId),
       type: relation.type,
       customLabel: relation.customLabel ?? '',
       description: relation.description ?? '',
-      fromPlaceId: relation.fromPlaceId,
+      fromPlaceId: place ? relation.fromPlaceId : null,
     });
   };
 
@@ -61,6 +67,24 @@ function PlaceRelationsPanel({ worldId, place, places }) {
     const type = form.type;
     const customLabel = type === 'CUSTOM' ? form.customLabel.trim() || null : null;
     const description = form.description.trim() || null;
+
+    if (!place) {
+      const key = editingId ?? `pending-${Date.now()}-${pending.length}`;
+      const entry = {
+        key,
+        fromPlaceId: null,
+        toPlaceId: Number(form.toPlaceId),
+        type,
+        customLabel,
+        description,
+      };
+      const next = editingId
+        ? pending.map((row) => (row.key === editingId ? entry : row))
+        : [...pending, entry];
+      onPendingChange(next);
+      closeForm();
+      return;
+    }
 
     const otherId = Number(form.toPlaceId);
     const keepIncoming = editingId != null && form.fromPlaceId != null && form.fromPlaceId !== place.id;
@@ -86,6 +110,10 @@ function PlaceRelationsPanel({ worldId, place, places }) {
 
   const handleDelete = async (relation) => {
     if (!window.confirm('Delete this relation?')) return;
+    if (!place) {
+      onPendingChange(pending.filter((row) => row.key !== relation.key));
+      return;
+    }
     try {
       await deletePlaceRelation(worldId, relation.id);
       load();
@@ -94,12 +122,14 @@ function PlaceRelationsPanel({ worldId, place, places }) {
     }
   };
 
-  const describe = (relation) => describePlaceRelation(relation, place.id, nameOf);
+  const describe = (relation) => describePlaceRelation(relation, place?.id ?? null, nameOf);
+
+  const visible = place ? relations : pending;
 
   return (
     <div className="relations-panel">
       <div className="relations-head">
-        <h3>Relations</h3>
+        <h3>{place ? 'Relations' : 'Relations (saved with this place)'}</h3>
         {!form && (
           <button
             type="button"
@@ -113,17 +143,21 @@ function PlaceRelationsPanel({ worldId, place, places }) {
       </div>
 
       {candidates.length === 0 && !form && (
-        <p className="empty-hint">Add another place first to link it to this one.</p>
+        <p className="empty-hint">
+          {place
+            ? 'Add another place first to link it to this one.'
+            : 'No other places yet — you can add relations once more places exist.'}
+        </p>
       )}
 
       {error && <p className="field-error">{error}</p>}
 
-      {relations === null && <p className="characters-hint">Loading relations…</p>}
+      {place && relations === null && <p className="characters-hint">Loading relations…</p>}
 
-      {relations !== null && relations.length > 0 && (
+      {visible !== null && visible.length > 0 && (
         <ul className="relations-list">
-          {relations.map((relation) => (
-            <li key={relation.id} className="relations-item">
+          {visible.map((relation) => (
+            <li key={relation.id ?? relation.key} className="relations-item">
               <span className="relations-item-text">
                 {describe(relation)}
                 {relation.description && (
@@ -143,7 +177,7 @@ function PlaceRelationsPanel({ worldId, place, places }) {
         </ul>
       )}
 
-      {relations !== null && relations.length === 0 && !form && candidates.length > 0 && (
+      {visible !== null && visible.length === 0 && !form && candidates.length > 0 && (
         <p className="empty-hint">No relations yet.</p>
       )}
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { createCharacter, listPlaces, updateCharacter } from '../api.js';
+import { createCharacter, createCharacterRelation, listPlaces, updateCharacter } from '../api.js';
 import CharacterRelationsPanel from './CharacterRelationsPanel.jsx';
 import ColorPicker from './ColorPicker.jsx';
 import CustomFieldsEditor from './CustomFieldsEditor.jsx';
@@ -29,6 +29,7 @@ function CharacterModal({ worldId, character, characters, onClose, onSaved }) {
     customFields: character?.customFields?.map((field) => ({ label: field.label ?? '', value: field.value ?? '' })) ?? [],
   }));
   const [places, setPlaces] = useState([]);
+  const [pendingRelations, setPendingRelations] = useState([]);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const nameInputRef = useRef(null);
@@ -107,6 +108,21 @@ function CharacterModal({ worldId, character, characters, onClose, onSaved }) {
       const saved = isEdit
         ? await updateCharacter(worldId, character.id, payload)
         : await createCharacter(worldId, payload);
+      if (!isEdit && pendingRelations.length > 0) {
+        for (const relation of pendingRelations) {
+          try {
+            await createCharacterRelation(worldId, {
+              fromCharacterId: saved.id,
+              toCharacterId: relation.toCharacterId,
+              type: relation.type,
+              customLabel: relation.customLabel ?? null,
+              description: relation.description ?? null,
+            });
+          } catch (err) {
+            window.alert(`Character saved, but a relation could not be created: ${err.message}`);
+          }
+        }
+      }
       onSaved(saved);
     } catch (err) {
       setErrors({ form: err.message });
@@ -295,9 +311,13 @@ function CharacterModal({ worldId, character, characters, onClose, onSaved }) {
           </div>
         </form>
 
-        {isEdit && (
-          <CharacterRelationsPanel worldId={worldId} character={character} characters={characters ?? []} />
-        )}
+        <CharacterRelationsPanel
+          worldId={worldId}
+          character={isEdit ? character : null}
+          characters={characters ?? []}
+          pending={pendingRelations}
+          onPendingChange={setPendingRelations}
+        />
       </section>
     </div>
   );
