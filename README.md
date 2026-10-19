@@ -8,7 +8,7 @@ Tvorsvit is a local-first worldbuilding and creative writing app. It lets you wr
 
 ## Status
 
-Early stage. Currently a full-stack prototype: a React SPA with a **worlds dashboard** (`/`), a **writing editor** (`/worlds/:id`), and **character cards** (`/worlds/:id/characters`), backed by a Spring Boot REST API that stores worlds and characters in an embedded H2 database on your PC.
+Early stage. Currently a full-stack prototype: a React SPA with a **worlds dashboard** (`/`), a **writing editor** (`/worlds/:id`), **character cards** (`/worlds/:id/characters`) with rich profile fields and character↔character relationships, **location cards** (`/worlds/:id/places`) with place↔place relationships, and a shared accent **color picker with a personal color library**. Backed by a Spring Boot REST API that stores everything in an embedded H2 database on your PC.
 
 ## Tech stack
 
@@ -37,8 +37,16 @@ flowchart LR
         F[React SPA - Vite :5173] -->|same-origin /api/* - proxied to :8081| B
         subgraph BE [Spring Boot :8081]
             B[WorldController] --> R[WorldRepository]
-            R --> DB[(H2 file - data/tvorsvit.mv.db)]
+            B --> CC[CharacterController]
+            B --> PCc[PlaceController]
+            B --> CR[CharacterRelationController]
+            B --> PR[PlaceRelationController]
             B --> S[StatusController]
+            R --> DB[(H2 file - data/tvorsvit.mv.db)]
+            CC --> DB
+            PCc --> DB
+            CR --> DB
+            PR --> DB
         end
     end
 ```
@@ -60,11 +68,15 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. The Vite dev server proxies `/api` requests to the backend on port 8081, so the SPA stays same-origin. While developing you can inspect the database directly at http://localhost:8081/h2-console (JDBC URL `jdbc:h2:file:./data/tvorsvit`). See `docs/api.md` for the endpoint reference, `docs/data-model.md` for the schema, `docs/frontend.md` for the SPA structure and data flow, and `docs/characters.md` for the character cards feature.
+Open http://localhost:5173. The Vite dev server proxies `/api` requests to the backend on port 8081, so the SPA stays same-origin. While developing you can inspect the database directly at http://localhost:8081/h2-console (JDBC URL `jdbc:h2:file:./data/tvorsvit`).
+
+Docs: `docs/api.md` (endpoint reference), `docs/data-model.md` (schema), `docs/frontend.md` (SPA structure and data flow), `docs/characters.md` + `docs/character-relations.md`, `docs/places.md` + `docs/place-relations.md`, `docs/custom-fields.md`, and `docs/color-picker.md`.
 
 ## Roadmap
 
 - Editor with autosave (Google-Docs-style editing)
-- Location cards — character cards are done (see `docs/characters.md`)
-- Relationship links and graph view
+- ~~Character cards~~ — done (`docs/characters.md`)
+- ~~Location cards~~ — done (`docs/places.md`)
+- ~~Relationship links~~ — character↔character and place↔place done (`docs/character-relations.md`, `docs/place-relations.md`)
+- Graph view connecting everything by relationship, location, or shared person
 - Authorisation and optional server-hosted data mode

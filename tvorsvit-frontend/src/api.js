@@ -57,3 +57,19 @@ export function updateCharacter(worldId, id, payload) {
 export function deleteCharacter(worldId, id) {
   return request(`/worlds/${worldId}/characters/${id}`, { method: 'DELETE' });
 }
+
+export function listPlaces(worldId) {
+  return request(`/worlds/${worldId}/places`);
+}
+
+export function createPlace(worldId, payload) {
+  return request(`/worlds/${worldId}/places`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export function updatePlace(worldId, id, payload) {
+  return request(`/worlds/${worldId}/places/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+}
+
+export function deletePlace(worldId, id) {
+  return request(`/worlds/${worldId}/places/${id}`, { method: 'DELETE' });
+}

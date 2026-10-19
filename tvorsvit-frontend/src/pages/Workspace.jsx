@@ -2,13 +2,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   deleteCharacter,
+  deletePlace,
   getWorld,
   listCharacters,
+  listPlaces,
   saveWorldContent,
 } from '../api.js';
 import CharacterCard from '../components/CharacterCard.jsx';
 import CharacterModal from '../components/CharacterModal.jsx';
 import EditWorldModal from '../components/EditWorldModal.jsx';
+import PlaceCard from '../components/PlaceCard.jsx';
+import PlaceModal from '../components/PlaceModal.jsx';
 import WorkbenchRail from '../components/WorkbenchRail.jsx';
 import WorldBar from '../components/WorldBar.jsx';
 import { WORLD_THEMES, themeOf } from '../worldThemes.js';
@@ -88,6 +92,7 @@ function Workspace() {
 
   const [world, setWorld] = useState(null);
   const [characters, setCharacters] = useState(null);
+  const [places, setPlaces] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [content, setContent] = useState('');
   const [dirty, setDirty] = useState(false);
@@ -95,6 +100,7 @@ function Workspace() {
   const [saveError, setSaveError] = useState(null);
   const [focusMode, setFocusMode] = useState(false);
   const [characterModal, setCharacterModal] = useState(null);
+  const [placeModal, setPlaceModal] = useState(null);
   const [editModal, setEditModal] = useState(false);
   const prevFocus = useRef(false);
   const textareaRef = useRef(null);
@@ -131,6 +137,33 @@ function Workspace() {
       .catch((err) => {
         setLoadError(err.message);
       });
+  }, [id]);
+
+  const fetchPlaces = useCallback(() => {
+    listPlaces(id)
+      .then((data) => {
+        setPlaces(data);
+        setLoadError(null);
+      })
+      .catch((err) => {
+        setLoadError(err.message);
+      });
+  }, [id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    listPlaces(id)
+      .then((data) => {
+        if (cancelled) return;
+        setPlaces(data);
+        setLoadError(null);
+      })
+      .catch((err) => {
+        if (!cancelled) setLoadError(err.message);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   useEffect(() => {
@@ -297,6 +330,28 @@ function Workspace() {
       });
   };
 
+  const handlePlaceSaved = (saved) => {
+    setPlaceModal(null);
+    setPlaces((current) => {
+      if (!current) return current;
+      const exists = current.some((place) => place.id === saved.id);
+      return exists
+        ? current.map((place) => (place.id === saved.id ? saved : place))
+        : [...current, saved];
+    });
+  };
+
+  const handleDeletePlace = (place) => {
+    if (!window.confirm(`Delete "${place.name}"?`)) return;
+    deletePlace(id, place.id)
+      .then(() => {
+        setPlaces((current) => (current ? current.filter((entry) => entry.id !== place.id) : current));
+      })
+      .catch((err) => {
+        setLoadError(err.message);
+      });
+  };
+
   if (loadError && !world) {
     return (
       <div className="error-page">
@@ -434,6 +489,58 @@ function Workspace() {
         )}
       </>
     );
+  } else if (active === 'places') {
+    mainView = (
+      <>
+        {loadError && (
+          <div className="error-banner">
+            <span>{loadError}</span>
+            <button type="button" onClick={fetchPlaces}>
+              Retry
+            </button>
+          </div>
+        )}
+
+        {places === null && !loadError && <p className="characters-hint">Loading places…</p>}
+
+        {places !== null && (
+          <>
+            <div className="character-grid">
+              <button
+                type="button"
+                className="create-tile"
+                onClick={() => setPlaceModal({ mode: 'create', place: null })}
+              >
+                <span className="create-tile-plus">+</span>
+                <span>Add a place</span>
+              </button>
+              {places.map((place) => (
+                <PlaceCard
+                  key={place.id}
+                  place={place}
+                  onEdit={(entry) => setPlaceModal({ mode: 'edit', place: entry })}
+                  onDelete={handleDeletePlace}
+                />
+              ))}
+            </div>
+
+            {places.length === 0 && (
+              <p className="empty-hint">No places yet — give your world some geography.</p>
+            )}
+          </>
+        )}
+
+        {placeModal && (
+          <PlaceModal
+            worldId={id}
+            place={placeModal.place}
+            places={places ?? []}
+            onClose={() => setPlaceModal(null)}
+            onSaved={handlePlaceSaved}
+          />
+        )}
+      </>
+    );
   } else if (active === 'story') {
     mainView = (
       <div className="paper">
@@ -546,7 +653,11 @@ function Workspace() {
     <div className="world-themed" data-world-theme={themeOf(world)}>
       <WorldBar world={world} right={barRight} />
       <div className="workbench">
-        <WorkbenchRail worldId={id} charactersCount={characters ? characters.length : undefined} />
+        <WorkbenchRail
+          worldId={id}
+          charactersCount={characters ? characters.length : undefined}
+          placesCount={places ? places.length : undefined}
+        />
         <main className="workbench-main">{mainView}</main>
       </div>
       {editModal && (

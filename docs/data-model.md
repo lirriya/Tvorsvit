@@ -77,6 +77,20 @@ tvorsvit/
   character/CharacterRepository
   character/CharacterRequest
   character/CharacterController
+  character/CharacterRelationType  -- enum
+  character/CharacterRelation      -- the entity (world-scoped link)
+  character/CharacterRelationRepository
+  character/CharacterRelationRequest
+  character/CharacterRelationController
+  place/Place              -- the entity (world-scoped)
+  place/PlaceRepository
+  place/PlaceRequest
+  place/PlaceController
+  place/PlaceRelationType  -- enum
+  place/PlaceRelation      -- the entity (world-scoped link)
+  place/PlaceRelationRepository
+  place/PlaceRelationRequest
+  place/PlaceRelationController
   config/WebConfig         -- global CORS
 ```
 
