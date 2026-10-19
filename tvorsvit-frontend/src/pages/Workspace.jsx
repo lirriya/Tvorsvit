@@ -486,6 +486,7 @@ function Workspace() {
           <CharacterModal
             worldId={id}
             character={characterModal.character}
+            characters={characters ?? []}
             onClose={() => setCharacterModal(null)}
             onSaved={handleCharacterSaved}
           />

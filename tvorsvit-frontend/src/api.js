@@ -58,6 +58,23 @@ export function deleteCharacter(worldId, id) {
   return request(`/worlds/${worldId}/characters/${id}`, { method: 'DELETE' });
 }
 
+export function listCharacterRelations(worldId, characterId) {
+  const query = characterId != null ? `?characterId=${characterId}` : '';
+  return request(`/worlds/${worldId}/character-relations${query}`);
+}
+
+export function createCharacterRelation(worldId, payload) {
+  return request(`/worlds/${worldId}/character-relations`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export function updateCharacterRelation(worldId, id, payload) {
+  return request(`/worlds/${worldId}/character-relations/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+}
+
+export function deleteCharacterRelation(worldId, id) {
+  return request(`/worlds/${worldId}/character-relations/${id}`, { method: 'DELETE' });
+}
+
 export function listPlaces(worldId) {
   return request(`/worlds/${worldId}/places`);
 }

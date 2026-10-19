@@ -1,4 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { listCharacterRelations } from '../api.js';
+import { describeCharacterRelation } from '../characterRelationTypes.js';
 
 const DEFAULT_COLOR = '#646cff';
 
@@ -12,9 +14,12 @@ function Field({ label, value }) {
   );
 }
 
-function CharacterDetails({ character, places, onClose, onEdit }) {
+function CharacterDetails({ worldId, character, characters, places, onClose, onEdit }) {
+  const [relations, setRelations] = useState(null);
+  const [relationsError, setRelationsError] = useState(null);
   const accent = character.color || DEFAULT_COLOR;
   const placeName = (id) => places?.find((place) => place.id === id)?.name ?? null;
+  const characterName = (id) => characters?.find((entry) => entry.id === id)?.name ?? `#${id}`;
 
   useEffect(() => {
     const handleKey = (event) => {
@@ -23,6 +28,20 @@ function CharacterDetails({ character, places, onClose, onEdit }) {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
+
+  useEffect(() => {
+    let active = true;
+    listCharacterRelations(worldId, character.id)
+      .then((data) => {
+        if (active) setRelations(data);
+      })
+      .catch((err) => {
+        if (active) setRelationsError(err.message);
+      });
+    return () => {
+      active = false;
+    };
+  }, [worldId, character.id]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -54,6 +73,27 @@ function CharacterDetails({ character, places, onClose, onEdit }) {
         <Field label="Favorite phrase" value={character.favoritePhrase} />
         <Field label="Born in" value={placeName(character.bornInPlaceId)} />
         <Field label="Lives in" value={placeName(character.livesInPlaceId)} />
+
+        <div className="detail-relations">
+          <h3 className="detail-relations-title">Relations</h3>
+          {relationsError && <p className="field-error">{relationsError}</p>}
+          {!relationsError && relations === null && <p className="characters-hint">Loading relations…</p>}
+          {!relationsError && relations?.length === 0 && <p className="empty-hint">No relations yet.</p>}
+          {!relationsError && relations?.length > 0 && (
+            <ul className="relations-list">
+              {relations.map((relation) => (
+                <li key={relation.id} className="relations-item">
+                  <span className="relations-item-text">
+                    {describeCharacterRelation(relation, character.id, characterName)}
+                    {relation.description && (
+                      <span className="relations-item-note">{relation.description}</span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         <div className="modal-actions">
           <button type="button" className="btn btn-secondary" onClick={onClose}>
