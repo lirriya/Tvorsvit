@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import tvorsvit.common.CustomFields;
 import tvorsvit.place.Place;
 import tvorsvit.place.PlaceRepository;
 import tvorsvit.world.World;
@@ -93,6 +94,7 @@ public class CharacterController {
         character.setFavoritePhrase(request.favoritePhrase());
         character.setBornInPlace(resolvePlace(worldId, request.bornInPlaceId()));
         character.setLivesInPlace(resolvePlace(worldId, request.livesInPlaceId()));
+        CustomFields.apply(request.customFields(), character.getCustomFields());
     }
 
     private Place resolvePlace(Long worldId, Long placeId) {

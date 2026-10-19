@@ -183,6 +183,73 @@ class CharacterControllerTests {
     }
 
     @Test
+    void createWithCustomFieldsReturnsThemInOrder() throws Exception {
+        long worldId = createWorld("Middle-earth");
+
+        mockMvc.perform(post("/api/worlds/{worldId}/characters", worldId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Kaelen\",\"customFields\":["
+                                + "{\"label\":\"Magic type\",\"value\":\"Fire\"},"
+                                + "{\"label\":\"Rank\",\"value\":\"Archmage\"},"
+                                + "{\"label\":\"Weakness\",\"value\":null}]}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.customFields.length()").value(3))
+                .andExpect(jsonPath("$.customFields[0].label").value("Magic type"))
+                .andExpect(jsonPath("$.customFields[0].value").value("Fire"))
+                .andExpect(jsonPath("$.customFields[1].label").value("Rank"))
+                .andExpect(jsonPath("$.customFields[2].label").value("Weakness"))
+                .andExpect(jsonPath("$.customFields[2].value").doesNotExist());
+    }
+
+    @Test
+    void updateReplacesCustomFields() throws Exception {
+        long worldId = createWorld("Middle-earth");
+        long characterId = createCharacter(worldId, "Kaelen");
+
+        mockMvc.perform(put("/api/worlds/{worldId}/characters/{id}", worldId, characterId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Kaelen\",\"customFields\":["
+                                + "{\"label\":\"Magic type\",\"value\":\"Ice\"},"
+                                + "{\"label\":\"Guild\",\"value\":\"Ash Circle\"}]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.customFields.length()").value(2))
+                .andExpect(jsonPath("$.customFields[0].value").value("Ice"))
+                .andExpect(jsonPath("$.customFields[1].label").value("Guild"));
+
+        mockMvc.perform(put("/api/worlds/{worldId}/characters/{id}", worldId, characterId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Kaelen\",\"customFields\":[{\"label\":\"Magic type\",\"value\":\"Storm\"}]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.customFields.length()").value(1))
+                .andExpect(jsonPath("$.customFields[0].value").value("Storm"));
+    }
+
+    @Test
+    void blankCustomFieldLabelsAreDropped() throws Exception {
+        long worldId = createWorld("Middle-earth");
+
+        mockMvc.perform(post("/api/worlds/{worldId}/characters", worldId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Kaelen\",\"customFields\":["
+                                + "{\"label\":\"   \",\"value\":\"nope\"},"
+                                + "{\"label\":\"Magic type\",\"value\":\"Fire\"}]}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.customFields.length()").value(1))
+                .andExpect(jsonPath("$.customFields[0].label").value("Magic type"));
+    }
+
+    @Test
+    void customFieldLabelTooLongReturns400() throws Exception {
+        long worldId = createWorld("Middle-earth");
+        String longLabel = "x".repeat(81);
+
+        mockMvc.perform(post("/api/worlds/{worldId}/characters", worldId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Kaelen\",\"customFields\":[{\"label\":\"" + longLabel + "\",\"value\":\"Fire\"}]}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void createWithRichFieldsPersistsThemAll() throws Exception {
         long worldId = createWorld("Middle-earth");
 

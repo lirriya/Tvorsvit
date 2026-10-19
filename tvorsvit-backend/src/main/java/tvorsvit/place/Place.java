@@ -2,18 +2,26 @@ package tvorsvit.place;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import tvorsvit.common.BaseEntity;
+import tvorsvit.common.CustomField;
 import tvorsvit.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "places")
@@ -40,6 +48,12 @@ public class Place extends BaseEntity {
 
     @Column(length = 7)
     private String color;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "place_custom_fields", joinColumns = @JoinColumn(name = "place_id"))
+    @OrderColumn(name = "field_position")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<CustomField> customFields = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -88,5 +102,13 @@ public class Place extends BaseEntity {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public List<CustomField> getCustomFields() {
+        return customFields;
+    }
+
+    public void setCustomFields(List<CustomField> customFields) {
+        this.customFields = customFields;
     }
 }

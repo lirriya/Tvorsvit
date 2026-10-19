@@ -151,6 +151,57 @@ class PlaceControllerTests {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void createWithCustomFieldsReturnsThemInOrder() throws Exception {
+        long worldId = createWorld("Middle-earth");
+
+        mockMvc.perform(post("/api/worlds/{worldId}/places", worldId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"The Gilded Tankard\",\"customFields\":["
+                                + "{\"label\":\"Region\",\"value\":\"Lower city\"},"
+                                + "{\"label\":\"Owner\",\"value\":\"Mira Voss\"}]}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.customFields.length()").value(2))
+                .andExpect(jsonPath("$.customFields[0].label").value("Region"))
+                .andExpect(jsonPath("$.customFields[0].value").value("Lower city"))
+                .andExpect(jsonPath("$.customFields[1].label").value("Owner"));
+    }
+
+    @Test
+    void updateReplacesCustomFields() throws Exception {
+        long worldId = createWorld("Middle-earth");
+        long placeId = createPlace(worldId, "Bag End");
+
+        mockMvc.perform(put("/api/worlds/{worldId}/places/{id}", worldId, placeId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Bag End\",\"customFields\":[{\"label\":\"Owner\",\"value\":\"Bilbo\"}]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.customFields.length()").value(1))
+                .andExpect(jsonPath("$.customFields[0].value").value("Bilbo"));
+
+        mockMvc.perform(put("/api/worlds/{worldId}/places/{id}", worldId, placeId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Bag End\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.customFields.length()").value(0));
+    }
+
+    @Test
+    void deletingWorldCascadesToItsPlacesWithCustomFields() throws Exception {
+        long worldId = createWorld("Middle-earth");
+
+        mockMvc.perform(post("/api/worlds/{worldId}/places", worldId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Bag End\",\"customFields\":[{\"label\":\"Owner\",\"value\":\"Bilbo\"}]}"))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(delete("/api/worlds/{id}", worldId))
+                .andExpect(status().isNoContent());
+
+        assertThat(placeRepository.count()).isZero();
+        assertThat(worldRepository.count()).isZero();
+    }
+
     private long createWorld(String name) throws Exception {
         String response = mockMvc.perform(post("/api/worlds")
                         .contentType(MediaType.APPLICATION_JSON)

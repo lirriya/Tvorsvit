@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPlace, updatePlace } from '../api.js';
 import ColorPicker from './ColorPicker.jsx';
+import CustomFieldsEditor from './CustomFieldsEditor.jsx';
 import PlaceRelationsPanel from './PlaceRelationsPanel.jsx';
 
 const DEFAULT_COLOR = '#646cff';
@@ -12,6 +13,7 @@ function PlaceModal({ worldId, place, places, onClose, onSaved }) {
     description: place?.description ?? '',
     photoUrl: place?.photoUrl ?? '',
     color: place?.color ?? DEFAULT_COLOR,
+    customFields: place?.customFields?.map((field) => ({ label: field.label ?? '', value: field.value ?? '' })) ?? [],
   }));
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -59,6 +61,9 @@ function PlaceModal({ worldId, place, places, onClose, onSaved }) {
       description: form.description.trim() || null,
       photoUrl: form.photoUrl.trim() || null,
       color: form.color,
+      customFields: form.customFields
+        .filter((field) => field.label.trim())
+        .map((field) => ({ label: field.label.trim(), value: field.value.trim() || null })),
     };
 
     setSubmitting(true);
@@ -137,6 +142,14 @@ function PlaceModal({ worldId, place, places, onClose, onSaved }) {
               value={form.color}
               onChange={(color) => setField('color', color)}
               label="Accent color"
+            />
+          </div>
+
+          <div className="field">
+            <span className="field-label">Custom fields</span>
+            <CustomFieldsEditor
+              fields={form.customFields}
+              onChange={(fields) => setField('customFields', fields)}
             />
           </div>
 
