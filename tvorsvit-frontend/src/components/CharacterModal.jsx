@@ -1,15 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
-import { createCharacter, updateCharacter } from '../api.js';
+import { createCharacter, listPlaces, updateCharacter } from '../api.js';
 
-const DEFAULT_COLOR = '#646cff';
+const MBTI_TYPES = [
+  'ISTJ', 'ISFJ', 'INFJ', 'INTJ',
+  'ISTP', 'ISFP', 'INFP', 'INTP',
+  'ESTP', 'ESFP', 'ENFP', 'ENTP',
+  'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ',
+];
 
 function CharacterModal({ worldId, character, onClose, onSaved }) {
   const isEdit = Boolean(character);
   const [form, setForm] = useState(() => ({
     name: character?.name ?? '',
     description: character?.description ?? '',
-    color: character?.color ?? DEFAULT_COLOR,
+    color: character?.color ?? '#646cff',
+    photoUrl: character?.photoUrl ?? '',
+    eyeColor: character?.eyeColor ?? '',
+    skinTone: character?.skinTone ?? '',
+    hairColor: character?.hairColor ?? '',
+    mbti: character?.mbti ?? '',
+    quirks: character?.quirks ?? '',
+    favoritePhrase: character?.favoritePhrase ?? '',
+    bornInPlaceId: character?.bornInPlaceId != null ? String(character.bornInPlaceId) : '',
+    livesInPlaceId: character?.livesInPlaceId != null ? String(character.livesInPlaceId) : '',
   }));
+  const [places, setPlaces] = useState([]);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const nameInputRef = useRef(null);
@@ -17,6 +32,20 @@ function CharacterModal({ worldId, character, onClose, onSaved }) {
   useEffect(() => {
     nameInputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    listPlaces(worldId)
+      .then((data) => {
+        if (!cancelled) setPlaces(data);
+      })
+      .catch(() => {
+        if (!cancelled) setPlaces([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [worldId]);
 
   useEffect(() => {
     const handleKey = (event) => {
@@ -39,6 +68,9 @@ function CharacterModal({ worldId, character, onClose, onSaved }) {
   const validate = () => {
     const next = {};
     if (!form.name.trim()) next.name = 'Name is required.';
+    if (form.photoUrl.trim() && !/^(https?:\/\/|\/|\.\/|\.\.\/)/.test(form.photoUrl.trim())) {
+      next.photoUrl = 'Use a full URL (https://…) or a path starting with “/”.';
+    }
     return next;
   };
 
@@ -52,6 +84,15 @@ function CharacterModal({ worldId, character, onClose, onSaved }) {
       name: form.name.trim(),
       description: form.description.trim() || null,
       color: form.color,
+      photoUrl: form.photoUrl.trim() || null,
+      eyeColor: form.eyeColor.trim() || null,
+      skinTone: form.skinTone.trim() || null,
+      hairColor: form.hairColor.trim() || null,
+      mbti: form.mbti || null,
+      quirks: form.quirks.trim() || null,
+      favoritePhrase: form.favoritePhrase.trim() || null,
+      bornInPlaceId: form.bornInPlaceId ? Number(form.bornInPlaceId) : null,
+      livesInPlaceId: form.livesInPlaceId ? Number(form.livesInPlaceId) : null,
     };
 
     setSubmitting(true);
@@ -69,7 +110,7 @@ function CharacterModal({ worldId, character, onClose, onSaved }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <section
-        className="modal-panel"
+        className="modal-panel modal-panel-wide"
         role="dialog"
         aria-modal="true"
         aria-labelledby={isEdit ? 'edit-character-title' : 'create-character-title'}
@@ -97,9 +138,130 @@ function CharacterModal({ worldId, character, onClose, onSaved }) {
               value={form.description}
               onChange={(event) => setField('description', event.target.value)}
               rows={3}
-              placeholder="Who are they? (optional)"
+              maxLength={300}
+              placeholder="A short introduction (optional)"
+            />
+            <span
+              className={`field-counter${form.description.length >= 240 ? ' is-near' : ''}${form.description.length >= 300 ? ' is-max' : ''}`}
+            >
+              {form.description.length}/300
+            </span>
+          </label>
+
+          <label className="field">
+            <span className="field-label">Photo</span>
+            <input
+              type="text"
+              value={form.photoUrl}
+              onChange={(event) => setField('photoUrl', event.target.value)}
+              placeholder="https://… or /images/character.jpg (optional)"
+            />
+            {errors.photoUrl && <span className="field-error">{errors.photoUrl}</span>}
+          </label>
+
+          {form.photoUrl.trim() && (
+            <div className="place-photo-preview">
+              <img src={form.photoUrl} alt="" />
+            </div>
+          )}
+
+          <div className="field-row">
+            <label className="field">
+              <span className="field-label">Eye color</span>
+              <input
+                type="text"
+                value={form.eyeColor}
+                maxLength={30}
+                onChange={(event) => setField('eyeColor', event.target.value)}
+                placeholder="e.g. green"
+              />
+            </label>
+            <label className="field">
+              <span className="field-label">Hair color</span>
+              <input
+                type="text"
+                value={form.hairColor}
+                maxLength={30}
+                onChange={(event) => setField('hairColor', event.target.value)}
+                placeholder="e.g. auburn"
+              />
+            </label>
+            <label className="field">
+              <span className="field-label">Skin tone</span>
+              <input
+                type="text"
+                value={form.skinTone}
+                maxLength={30}
+                onChange={(event) => setField('skinTone', event.target.value)}
+                placeholder="e.g. olive"
+              />
+            </label>
+          </div>
+
+          <label className="field">
+            <span className="field-label">MBTI</span>
+            <select value={form.mbti} onChange={(event) => setField('mbti', event.target.value)}>
+              <option value="">— None —</option>
+              {MBTI_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field">
+            <span className="field-label">Quirks</span>
+            <textarea
+              value={form.quirks}
+              onChange={(event) => setField('quirks', event.target.value)}
+              rows={2}
+              maxLength={300}
+              placeholder="Little habits, tics, oddities (optional)"
             />
           </label>
+
+          <label className="field">
+            <span className="field-label">Favorite phrase</span>
+            <input
+              type="text"
+              value={form.favoritePhrase}
+              maxLength={200}
+              onChange={(event) => setField('favoritePhrase', event.target.value)}
+              placeholder="Something they always say (optional)"
+            />
+          </label>
+
+          <div className="field-row">
+            <label className="field">
+              <span className="field-label">Born in</span>
+              <select
+                value={form.bornInPlaceId}
+                onChange={(event) => setField('bornInPlaceId', event.target.value)}
+              >
+                <option value="">— Unknown —</option>
+                {places.map((place) => (
+                  <option key={place.id} value={place.id}>
+                    {place.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span className="field-label">Lives in</span>
+              <select
+                value={form.livesInPlaceId}
+                onChange={(event) => setField('livesInPlaceId', event.target.value)}
+              >
+                <option value="">— Unknown —</option>
+                {places.map((place) => (
+                  <option key={place.id} value={place.id}>
+                    {place.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
           <label className="field field-color">
             <span className="field-label">Accent color</span>
@@ -109,7 +271,6 @@ function CharacterModal({ worldId, character, onClose, onSaved }) {
               onChange={(event) => setField('color', event.target.value)}
               aria-label="Accent color"
             />
-            <span className="color-hex">{form.color}</span>
           </label>
 
           {errors.form && <p className="field-error form-error">{errors.form}</p>}

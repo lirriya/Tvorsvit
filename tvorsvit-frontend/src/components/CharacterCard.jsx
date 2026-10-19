@@ -1,6 +1,6 @@
 const DEFAULT_COLOR = '#646cff';
 
-function CharacterCard({ character, onEdit, onDelete }) {
+function CharacterCard({ character, onDetails, onEdit, onDelete }) {
   const accent = character.color || DEFAULT_COLOR;
   return (
     <article className="character-card" style={{ '--accent': accent }}>
@@ -9,6 +9,13 @@ function CharacterCard({ character, onEdit, onDelete }) {
         <span className="character-card-title">{character.name}</span>
         {character.description && <span className="character-card-description">{character.description}</span>}
         <span className="character-card-actions">
+          <button
+            type="button"
+            className="btn btn-secondary btn-small"
+            onClick={() => onDetails(character)}
+          >
+            See {character.name} details
+          </button>
           <button type="button" className="btn btn-secondary btn-small" onClick={() => onEdit(character)}>
             Edit
           </button>

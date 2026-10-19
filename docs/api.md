@@ -70,6 +70,19 @@ Characters always belong to a world; their id is only meaningful inside its worl
   "name": "Kaelen of the Ashwastes",
   "description": "A wandering cartographer",
   "color": "#22c55e",
+  "photoUrl": "https://example.com/kaelen.png",
+  "eyeColor": "green",
+  "skinTone": "olive",
+  "hairColor": "auburn",
+  "mbti": "INFJ",
+  "quirks": "Hums while drawing",
+  "favoritePhrase": "Maps never lie",
+  "bornInPlaceId": null,
+  "livesInPlaceId": 4,
+  "customFields": [
+    { "label": "Magic type", "value": "Fire" },
+    { "label": "Rank", "value": "Archmage" }
+  ],
   "createdAt": "2026-10-01T18:26:42.947",
   "updatedAt": "2026-10-01T18:26:42.947"
 }
@@ -82,9 +95,119 @@ Characters always belong to a world; their id is only meaningful inside its worl
 | name | string | required, non-blank, trimmed, max 80 |
 | description | string | optional, max 300 |
 | color | string | optional hex accent, e.g. `#646cff` |
+| photoUrl | string | optional, max 500; full URL or site-relative path |
+| eyeColor / hairColor / skinTone | string | optional, max 30 each |
+| mbti | string | optional; one of the 16 MBTI types (`INFJ`, `ENTP`, …) or omitted |
+| quirks | string | optional, max 300 |
+| favoritePhrase | string | optional, max 200 |
+| bornInPlaceId | number | optional; a place id **in the same world** (else `404`) |
+| livesInPlaceId | number | optional; a place id **in the same world** (else `404`) |
+| customFields | array | optional ordered list of `{ label, value }`; see `docs/custom-fields.md` |
 | createdAt / updatedAt | ISO-8601 string | timestamps |
 
-The nested `world` association is intentionally not serialized — the JSON carries only `worldId`, keeping payloads flat and light.
+The nested `world`, `bornInPlace` and `livesInPlace` associations are intentionally not serialized — the JSON carries only the ids, keeping payloads flat and light.
+
+## Place object
+
+Places always belong to a world; their id is only meaningful inside its world.
+
+```json
+{
+  "id": 1,
+  "worldId": 3,
+  "name": "The Gilded Tankard",
+  "description": "A busy tavern in the lower city",
+  "photoUrl": "https://example.com/tankard.png",
+  "color": "#22c55e",
+  "customFields": [
+    { "label": "Region", "value": "Lower city" },
+    { "label": "Owner", "value": "Mira Voss" }
+  ],
+  "createdAt": "2026-10-19T12:00:00.000",
+  "updatedAt": "2026-10-19T12:00:00.000"
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| id | number | assigned by the database |
+| worldId | number | the owning world; required (path variable on create) |
+| name | string | required, non-blank, trimmed, max 80 |
+| description | string | optional, max 500 |
+| photoUrl | string | optional, max 500; full URL or site-relative path (no upload handling yet) |
+| color | string | optional hex accent, e.g. `#646cff` |
+| customFields | array | optional ordered list of `{ label, value }`; see `docs/custom-fields.md` |
+| createdAt / updatedAt | ISO-8601 string | timestamps |
+
+| Field | Type | Notes |
+|---|---|---|
+| id | number | assigned by the database |
+| worldId | number | the owning world; required (path variable on create) |
+| name | string | required, non-blank, trimmed, max 80 |
+| description | string | optional, max 500 |
+| photoUrl | string | optional, max 500; full URL or site-relative path (no upload handling yet) |
+| color | string | optional hex accent, e.g. `#646cff` |
+| createdAt / updatedAt | ISO-8601 string | timestamps |
+
+Like characters, the nested `world` association is not serialized — the JSON carries only `worldId`.
+
+## Place relation object
+
+A place relation links two places of the same world (see `docs/place-relations.md`).
+
+```json
+{
+  "id": 1,
+  "worldId": 3,
+  "fromPlaceId": 4,
+  "toPlaceId": 9,
+  "type": "PART_OF",
+  "customLabel": null,
+  "description": "Bree lies in Eriador",
+  "createdAt": "2026-10-19T12:00:00.000",
+  "updatedAt": "2026-10-19T12:00:00.000"
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| id | number | assigned by the database |
+| worldId | number | the owning world |
+| fromPlaceId | number | required; a place in the same world |
+| toPlaceId | number | required; a place in the same world, different from `fromPlaceId` |
+| type | string | one of `LOCATED_IN` `PART_OF` `CONNECTED_TO` `NEIGHBOR` `OTHER` `CUSTOM` |
+| customLabel | string | required when `type = CUSTOM`, else null |
+| description | string | optional note, max 200 |
+| createdAt / updatedAt | ISO-8601 string | timestamps |
+
+## Character relation object
+
+A character relation links two characters of the same world (see `docs/character-relations.md`). It is stored as a single row and is not mirrored.
+
+```json
+{
+  "id": 1,
+  "worldId": 3,
+  "fromCharacterId": 5,
+  "toCharacterId": 8,
+  "type": "MENTOR",
+  "customLabel": null,
+  "description": "Taught him the old songs",
+  "createdAt": "2026-10-19T12:00:00.000",
+  "updatedAt": "2026-10-19T12:00:00.000"
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| id | number | assigned by the database |
+| worldId | number | the owning world |
+| fromCharacterId | number | required; a character in the same world |
+| toCharacterId | number | required; a character in the same world, different from `fromCharacterId` |
+| type | string | one of `FRIEND` `FAMILY` `ROMANTIC` `RIVAL` `MENTOR` `ALLY` `OTHER` `CUSTOM` |
+| customLabel | string | required when `type = CUSTOM`, else null |
+| description | string | optional note, max 200 |
+| createdAt / updatedAt | ISO-8601 string | timestamps |
 
 ## Example: create a character
 
@@ -147,8 +270,17 @@ Response `200 OK` (the updated world, with `content` filled in). The metadata `P
 | `type` not one of the enum values | 400 |
 | malformed JSON / unknown enum string | 400 |
 | character `name` blank or missing | 400 |
+| character `mbti` not one of the 16 types | 400 |
+| character `bornInPlaceId` / `livesInPlaceId` not in the same world | 404 |
+| custom field `label` longer than 80 or `value` longer than 500 | 400 |
+| place `name` blank or missing | 400 |
+| place relation endpoints equal | 400 |
+| place relation `type = CUSTOM` without `customLabel` | 400 |
+| character relation endpoints equal | 400 |
+| character relation `type = CUSTOM` without `customLabel` | 400 |
+| relation endpoint id not in the same world | 404 |
 
-Validation lives on the request DTOs (`WorldRequest`, `CharacterRequest`) at the API boundary, so invalid payloads never reach the repository.
+Validation lives on the request DTOs (`WorldRequest`, `CharacterRequest`, `PlaceRequest`, `PlaceRelationRequest`, `CharacterRelationRequest`) at the API boundary, so invalid payloads never reach the repository.
 
 ## Create flow
 

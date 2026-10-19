@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import tvorsvit.place.PlaceRepository;
 import tvorsvit.world.WorldRepository;
 
 import java.util.regex.Matcher;
@@ -37,9 +38,13 @@ class CharacterControllerTests {
     @Autowired
     private CharacterRepository characterRepository;
 
+    @Autowired
+    private PlaceRepository placeRepository;
+
     @BeforeEach
     void cleanDatabase() {
         characterRepository.deleteAll();
+        placeRepository.deleteAll();
         worldRepository.deleteAll();
     }
 
@@ -165,13 +170,93 @@ class CharacterControllerTests {
     void deletingWorldCascadesToItsCharacters() throws Exception {
         long worldId = createWorld("Middle-earth");
         createCharacter(worldId, "Aragorn");
-        createCharacter(worldId, "Legolas");
+        mockMvc.perform(post("/api/worlds/{worldId}/characters", worldId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Legolas\",\"customFields\":[{\"label\":\"Magic type\",\"value\":\"Sylvan\"}]}"))
+                .andExpect(status().isCreated());
 
         mockMvc.perform(delete("/api/worlds/{id}", worldId))
                 .andExpect(status().isNoContent());
 
         assertThat(characterRepository.count()).isZero();
         assertThat(worldRepository.count()).isZero();
+    }
+
+    @Test
+    void createWithRichFieldsPersistsThemAll() throws Exception {
+        long worldId = createWorld("Middle-earth");
+
+        mockMvc.perform(post("/api/worlds/{worldId}/characters", worldId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Kaelen\",\"description\":\"Cartographer\",\"color\":\"#22c55e\","
+                                + "\"photoUrl\":\"https://example.com/kaelen.png\",\"eyeColor\":\"green\","
+                                + "\"skinTone\":\"olive\",\"hairColor\":\"auburn\",\"mbti\":\"INFJ\","
+                                + "\"quirks\":\"Hums while drawing\",\"favoritePhrase\":\"Maps never lie\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.photoUrl").value("https://example.com/kaelen.png"))
+                .andExpect(jsonPath("$.eyeColor").value("green"))
+                .andExpect(jsonPath("$.skinTone").value("olive"))
+                .andExpect(jsonPath("$.hairColor").value("auburn"))
+                .andExpect(jsonPath("$.mbti").value("INFJ"))
+                .andExpect(jsonPath("$.quirks").value("Hums while drawing"))
+                .andExpect(jsonPath("$.favoritePhrase").value("Maps never lie"));
+    }
+
+    @Test
+    void createWithInvalidMbtiReturns400() throws Exception {
+        long worldId = createWorld("Middle-earth");
+
+        mockMvc.perform(post("/api/worlds/{worldId}/characters", worldId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Kaelen\",\"mbti\":\"XXXX\"}"))
+                .andExpect(status().isBadRequest());
+
+        assertThat(characterRepository.count()).isZero();
+    }
+
+    @Test
+    void createLinksCharacterToPlaceInSameWorld() throws Exception {
+        long worldId = createWorld("Middle-earth");
+        long placeId = createPlace(worldId, "Rivendell");
+
+        mockMvc.perform(post("/api/worlds/{worldId}/characters", worldId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Elrond\",\"bornInPlaceId\":" + placeId + ",\"livesInPlaceId\":" + placeId + "}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.bornInPlaceId").value(placeId))
+                .andExpect(jsonPath("$.livesInPlaceId").value(placeId));
+    }
+
+    @Test
+    void createWithPlaceFromAnotherWorldReturns404() throws Exception {
+        long worldA = createWorld("World A");
+        long worldB = createWorld("World B");
+        long placeId = createPlace(worldB, "Foreign Place");
+
+        mockMvc.perform(post("/api/worlds/{worldId}/characters", worldA)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Lost\",\"bornInPlaceId\":" + placeId + "}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deletingPlaceSetsCharacterPlaceLinksToNull() throws Exception {
+        long worldId = createWorld("Middle-earth");
+        long placeId = createPlace(worldId, "Bag End");
+        long characterId = createCharacter(worldId, "Bilbo");
+
+        mockMvc.perform(put("/api/worlds/{worldId}/characters/{id}", worldId, characterId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Bilbo\",\"livesInPlaceId\":" + placeId + "}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.livesInPlaceId").value(placeId));
+
+        mockMvc.perform(delete("/api/worlds/{worldId}/places/{id}", worldId, placeId))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/worlds/{worldId}/characters", worldId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].livesInPlaceId").doesNotExist());
     }
 
     private long createWorld(String name) throws Exception {
@@ -202,6 +287,22 @@ class CharacterControllerTests {
         Matcher matcher = ID_PATTERN.matcher(body);
         if (!matcher.find()) {
             throw new AssertionError("Created character response did not contain an id: " + body);
+        }
+        return Long.parseLong(matcher.group(1));
+    }
+
+    private long createPlace(long worldId, String name) throws Exception {
+        String body = mockMvc.perform(post("/api/worlds/{worldId}/places", worldId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"" + name + "\"}"))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Matcher matcher = ID_PATTERN.matcher(body);
+        if (!matcher.find()) {
+            throw new AssertionError("Created place response did not contain an id: " + body);
         }
         return Long.parseLong(matcher.group(1));
     }
