@@ -9,7 +9,7 @@ import { CHARACTER_RELATION_TYPES, describeCharacterRelation } from '../characte
 
 const EMPTY_FORM = { otherId: '', type: 'FRIEND', customLabel: '', description: '', fromId: null };
 
-function CharacterRelationsPanel({ worldId, character, characters }) {
+function CharacterRelationsPanel({ worldId, character, characters, pending = [], onPendingChange }) {
   const [relations, setRelations] = useState(null);
   const [form, setForm] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -25,12 +25,14 @@ function CharacterRelationsPanel({ worldId, character, characters }) {
   }, [worldId, character]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (character) {
+      load();
+    }
+  }, [character, load]);
 
   const nameOf = (id) => characters.find((entry) => entry.id === id)?.name ?? `#${id}`;
 
-  const candidates = characters.filter((entry) => entry.id !== character.id);
+  const candidates = characters.filter((entry) => entry.id !== character?.id);
 
   const openCreate = () => {
     setEditingId(null);
@@ -38,14 +40,18 @@ function CharacterRelationsPanel({ worldId, character, characters }) {
   };
 
   const openEdit = (relation) => {
-    setEditingId(relation.id);
-    const otherId = relation.fromCharacterId === character.id ? relation.toCharacterId : relation.fromCharacterId;
+    setEditingId(character ? relation.id : relation.key);
+    const otherId = character
+      ? relation.fromCharacterId === character.id
+        ? relation.toCharacterId
+        : relation.fromCharacterId
+      : relation.toCharacterId;
     setForm({
       otherId: String(otherId),
       type: relation.type,
       customLabel: relation.customLabel ?? '',
       description: relation.description ?? '',
-      fromId: relation.fromCharacterId,
+      fromId: character ? relation.fromCharacterId : null,
     });
   };
 
@@ -61,6 +67,23 @@ function CharacterRelationsPanel({ worldId, character, characters }) {
     const type = form.type;
     const customLabel = type === 'CUSTOM' ? form.customLabel.trim() || null : null;
     const description = form.description.trim() || null;
+
+    if (!character) {
+      const entry = {
+        key: editingId ?? `pending-${Date.now()}-${pending.length}`,
+        fromCharacterId: null,
+        toCharacterId: Number(form.otherId),
+        type,
+        customLabel,
+        description,
+      };
+      const next = editingId
+        ? pending.map((row) => (row.key === editingId ? { ...entry, key: editingId } : row))
+        : [...pending, entry];
+      onPendingChange(next);
+      closeForm();
+      return;
+    }
 
     const otherId = Number(form.otherId);
     const keepIncoming = editingId != null && form.fromId != null && form.fromId !== character.id;
@@ -86,6 +109,10 @@ function CharacterRelationsPanel({ worldId, character, characters }) {
 
   const handleDelete = async (relation) => {
     if (!window.confirm('Delete this relation?')) return;
+    if (!character) {
+      onPendingChange(pending.filter((row) => row.key !== relation.key));
+      return;
+    }
     try {
       await deleteCharacterRelation(worldId, relation.id);
       load();
@@ -94,12 +121,14 @@ function CharacterRelationsPanel({ worldId, character, characters }) {
     }
   };
 
-  const describe = (relation) => describeCharacterRelation(relation, character.id, nameOf);
+  const describe = (relation) => describeCharacterRelation(relation, character?.id ?? null, nameOf);
+
+  const visible = character ? relations : pending;
 
   return (
     <div className="relations-panel">
       <div className="relations-head">
-        <h3>Relations</h3>
+        <h3>{character ? 'Relations' : 'Relations (saved with this character)'}</h3>
         {!form && (
           <button
             type="button"
@@ -113,17 +142,21 @@ function CharacterRelationsPanel({ worldId, character, characters }) {
       </div>
 
       {candidates.length === 0 && !form && (
-        <p className="empty-hint">Add another character first to link them to this one.</p>
+        <p className="empty-hint">
+          {character
+            ? 'Add another character first to link them to this one.'
+            : 'No other characters yet — you can add relations once more characters exist.'}
+        </p>
       )}
 
       {error && <p className="field-error">{error}</p>}
 
-      {relations === null && <p className="characters-hint">Loading relations…</p>}
+      {character && relations === null && <p className="characters-hint">Loading relations…</p>}
 
-      {relations !== null && relations.length > 0 && (
+      {visible !== null && visible.length > 0 && (
         <ul className="relations-list">
-          {relations.map((relation) => (
-            <li key={relation.id} className="relations-item">
+          {visible.map((relation) => (
+            <li key={relation.id ?? relation.key} className="relations-item">
               <span className="relations-item-text">
                 {describe(relation)}
                 {relation.description && (
@@ -143,7 +176,7 @@ function CharacterRelationsPanel({ worldId, character, characters }) {
         </ul>
       )}
 
-      {relations !== null && relations.length === 0 && !form && candidates.length > 0 && (
+      {visible !== null && visible.length === 0 && !form && candidates.length > 0 && (
         <p className="empty-hint">No relations yet.</p>
       )}
 

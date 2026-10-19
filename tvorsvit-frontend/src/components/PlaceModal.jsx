@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { createPlace, updatePlace } from '../api.js';
+import { createPlace, createPlaceRelation, updatePlace } from '../api.js';
 import ColorPicker from './ColorPicker.jsx';
 import CustomFieldsEditor from './CustomFieldsEditor.jsx';
 import PlaceRelationsPanel from './PlaceRelationsPanel.jsx';
@@ -15,6 +15,7 @@ function PlaceModal({ worldId, place, places, onClose, onSaved }) {
     color: place?.color ?? DEFAULT_COLOR,
     customFields: place?.customFields?.map((field) => ({ label: field.label ?? '', value: field.value ?? '' })) ?? [],
   }));
+  const [pendingRelations, setPendingRelations] = useState([]);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const nameInputRef = useRef(null);
@@ -71,6 +72,21 @@ function PlaceModal({ worldId, place, places, onClose, onSaved }) {
       const saved = isEdit
         ? await updatePlace(worldId, place.id, payload)
         : await createPlace(worldId, payload);
+      if (!isEdit && pendingRelations.length > 0) {
+        for (const relation of pendingRelations) {
+          try {
+            await createPlaceRelation(worldId, {
+              fromPlaceId: saved.id,
+              toPlaceId: relation.toPlaceId,
+              type: relation.type,
+              customLabel: relation.customLabel ?? null,
+              description: relation.description ?? null,
+            });
+          } catch (err) {
+            window.alert(`Place saved, but a relation could not be created: ${err.message}`);
+          }
+        }
+      }
       onSaved(saved);
     } catch (err) {
       setErrors({ form: err.message });
@@ -165,9 +181,13 @@ function PlaceModal({ worldId, place, places, onClose, onSaved }) {
           </div>
         </form>
 
-        {isEdit && (
-          <PlaceRelationsPanel worldId={worldId} place={place} places={places ?? []} />
-        )}
+        <PlaceRelationsPanel
+          worldId={worldId}
+          place={isEdit ? place : null}
+          places={places ?? []}
+          pending={pendingRelations}
+          onPendingChange={setPendingRelations}
+        />
       </section>
     </div>
   );
