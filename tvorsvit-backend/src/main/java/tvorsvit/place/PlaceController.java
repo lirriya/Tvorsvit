@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import tvorsvit.common.CustomFields;
 import tvorsvit.world.World;
 import tvorsvit.world.WorldRepository;
 
@@ -78,5 +79,6 @@ public class PlaceController {
         place.setDescription(request.description());
         place.setPhotoUrl(request.photoUrl());
         place.setColor(request.color());
+        CustomFields.apply(request.customFields(), place.getCustomFields());
     }
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createCharacter, listPlaces, updateCharacter } from '../api.js';
 import CharacterRelationsPanel from './CharacterRelationsPanel.jsx';
 import ColorPicker from './ColorPicker.jsx';
+import CustomFieldsEditor from './CustomFieldsEditor.jsx';
 
 const MBTI_TYPES = [
   'ISTJ', 'ISFJ', 'INFJ', 'INTJ',
@@ -25,6 +26,7 @@ function CharacterModal({ worldId, character, characters, onClose, onSaved }) {
     favoritePhrase: character?.favoritePhrase ?? '',
     bornInPlaceId: character?.bornInPlaceId != null ? String(character.bornInPlaceId) : '',
     livesInPlaceId: character?.livesInPlaceId != null ? String(character.livesInPlaceId) : '',
+    customFields: character?.customFields?.map((field) => ({ label: field.label ?? '', value: field.value ?? '' })) ?? [],
   }));
   const [places, setPlaces] = useState([]);
   const [errors, setErrors] = useState({});
@@ -95,6 +97,9 @@ function CharacterModal({ worldId, character, characters, onClose, onSaved }) {
       favoritePhrase: form.favoritePhrase.trim() || null,
       bornInPlaceId: form.bornInPlaceId ? Number(form.bornInPlaceId) : null,
       livesInPlaceId: form.livesInPlaceId ? Number(form.livesInPlaceId) : null,
+      customFields: form.customFields
+        .filter((field) => field.label.trim())
+        .map((field) => ({ label: field.label.trim(), value: field.value.trim() || null })),
     };
 
     setSubmitting(true);
@@ -268,6 +273,14 @@ function CharacterModal({ worldId, character, characters, onClose, onSaved }) {
           <div className="field field-color">
             <span className="field-label">Accent color</span>
             <ColorPicker value={form.color} onChange={(color) => setField('color', color)} />
+          </div>
+
+          <div className="field">
+            <span className="field-label">Custom fields</span>
+            <CustomFieldsEditor
+              fields={form.customFields}
+              onChange={(fields) => setField('customFields', fields)}
+            />
           </div>
 
           {errors.form && <p className="field-error form-error">{errors.form}</p>}

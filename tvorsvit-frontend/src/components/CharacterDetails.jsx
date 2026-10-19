@@ -74,6 +74,10 @@ function CharacterDetails({ worldId, character, characters, places, onClose, onE
         <Field label="Born in" value={placeName(character.bornInPlaceId)} />
         <Field label="Lives in" value={placeName(character.livesInPlaceId)} />
 
+        {character.customFields?.map((field, index) => (
+          <Field key={`${field.label}-${index}`} label={field.label} value={field.value} />
+        ))}
+
         <div className="detail-relations">
           <h3 className="detail-relations-title">Relations</h3>
           {relationsError && <p className="field-error">{relationsError}</p>}

@@ -2,19 +2,27 @@ package tvorsvit.character;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import tvorsvit.common.BaseEntity;
+import tvorsvit.common.CustomField;
 import tvorsvit.place.Place;
 import tvorsvit.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "characters")
@@ -71,6 +79,12 @@ public class Character extends BaseEntity {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JsonIgnore
     private Place livesInPlace;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "character_custom_fields", joinColumns = @JoinColumn(name = "character_id"))
+    @OrderColumn(name = "field_position")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<CustomField> customFields = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -193,5 +207,13 @@ public class Character extends BaseEntity {
 
     public Place getLivesInPlace() {
         return livesInPlace;
+    }
+
+    public List<CustomField> getCustomFields() {
+        return customFields;
+    }
+
+    public void setCustomFields(List<CustomField> customFields) {
+        this.customFields = customFields;
     }
 }

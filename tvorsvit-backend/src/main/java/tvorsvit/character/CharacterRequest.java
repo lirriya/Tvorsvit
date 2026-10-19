@@ -1,8 +1,12 @@
 package tvorsvit.character;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import tvorsvit.common.CustomFieldRequest;
+
+import java.util.List;
 
 public record CharacterRequest(
         @NotBlank String name,
@@ -19,5 +23,6 @@ public record CharacterRequest(
         @Size(max = 300) String quirks,
         @Size(max = 200) String favoritePhrase,
         Long bornInPlaceId,
-        Long livesInPlaceId) {
+        Long livesInPlaceId,
+        List<@Valid CustomFieldRequest> customFields) {
 }
