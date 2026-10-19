@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import tvorsvit.common.BaseEntity;
+import tvorsvit.place.Place;
 import tvorsvit.world.World;
 
 @Entity
@@ -38,6 +39,39 @@ public class Character extends BaseEntity {
     @Column(length = 7)
     private String color;
 
+    @Column(length = 500)
+    private String photoUrl;
+
+    @Column(length = 30)
+    private String eyeColor;
+
+    @Column(length = 30)
+    private String skinTone;
+
+    @Column(length = 30)
+    private String hairColor;
+
+    @Column(length = 4)
+    private String mbti;
+
+    @Column(length = 300)
+    private String quirks;
+
+    @Column(length = 200)
+    private String favoritePhrase;
+
+    @ManyToOne
+    @JoinColumn(name = "born_in_place_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JsonIgnore
+    private Place bornInPlace;
+
+    @ManyToOne
+    @JoinColumn(name = "lives_in_place_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JsonIgnore
+    private Place livesInPlace;
+
     public Long getId() {
         return id;
     }
@@ -45,6 +79,24 @@ public class Character extends BaseEntity {
     @JsonProperty("worldId")
     public Long getWorldId() {
         return world.getId();
+    }
+
+    @JsonProperty("bornInPlaceId")
+    public Long getBornInPlaceId() {
+        return bornInPlace != null ? bornInPlace.getId() : null;
+    }
+
+    public void setBornInPlace(Place bornInPlace) {
+        this.bornInPlace = bornInPlace;
+    }
+
+    @JsonProperty("livesInPlaceId")
+    public Long getLivesInPlaceId() {
+        return livesInPlace != null ? livesInPlace.getId() : null;
+    }
+
+    public void setLivesInPlace(Place livesInPlace) {
+        this.livesInPlace = livesInPlace;
     }
 
     public World getWorld() {
@@ -77,5 +129,69 @@ public class Character extends BaseEntity {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public String getEyeColor() {
+        return eyeColor;
+    }
+
+    public void setEyeColor(String eyeColor) {
+        this.eyeColor = eyeColor;
+    }
+
+    public String getSkinTone() {
+        return skinTone;
+    }
+
+    public void setSkinTone(String skinTone) {
+        this.skinTone = skinTone;
+    }
+
+    public String getHairColor() {
+        return hairColor;
+    }
+
+    public void setHairColor(String hairColor) {
+        this.hairColor = hairColor;
+    }
+
+    public String getMbti() {
+        return mbti;
+    }
+
+    public void setMbti(String mbti) {
+        this.mbti = mbti;
+    }
+
+    public String getQuirks() {
+        return quirks;
+    }
+
+    public void setQuirks(String quirks) {
+        this.quirks = quirks;
+    }
+
+    public String getFavoritePhrase() {
+        return favoritePhrase;
+    }
+
+    public void setFavoritePhrase(String favoritePhrase) {
+        this.favoritePhrase = favoritePhrase;
+    }
+
+    public Place getBornInPlace() {
+        return bornInPlace;
+    }
+
+    public Place getLivesInPlace() {
+        return livesInPlace;
     }
 }

@@ -9,6 +9,7 @@ import {
   saveWorldContent,
 } from '../api.js';
 import CharacterCard from '../components/CharacterCard.jsx';
+import CharacterDetails from '../components/CharacterDetails.jsx';
 import CharacterModal from '../components/CharacterModal.jsx';
 import EditWorldModal from '../components/EditWorldModal.jsx';
 import PlaceCard from '../components/PlaceCard.jsx';
@@ -100,6 +101,7 @@ function Workspace() {
   const [saveError, setSaveError] = useState(null);
   const [focusMode, setFocusMode] = useState(false);
   const [characterModal, setCharacterModal] = useState(null);
+  const [characterDetails, setCharacterDetails] = useState(null);
   const [placeModal, setPlaceModal] = useState(null);
   const [editModal, setEditModal] = useState(false);
   const prevFocus = useRef(false);
@@ -467,6 +469,7 @@ function Workspace() {
                 <CharacterCard
                   key={character.id}
                   character={character}
+                  onDetails={(entry) => setCharacterDetails(entry)}
                   onEdit={(entry) => setCharacterModal({ mode: 'edit', character: entry })}
                   onDelete={handleDeleteCharacter}
                 />
@@ -485,6 +488,20 @@ function Workspace() {
             character={characterModal.character}
             onClose={() => setCharacterModal(null)}
             onSaved={handleCharacterSaved}
+          />
+        )}
+
+        {characterDetails && (
+          <CharacterDetails
+            worldId={id}
+            character={characterDetails}
+            characters={characters ?? []}
+            places={places}
+            onClose={() => setCharacterDetails(null)}
+            onEdit={(entry) => {
+              setCharacterDetails(null);
+              setCharacterModal({ mode: 'edit', character: entry });
+            }}
           />
         )}
       </>

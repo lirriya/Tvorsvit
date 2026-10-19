@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import tvorsvit.place.Place;
+import tvorsvit.place.PlaceRepository;
 import tvorsvit.world.World;
 import tvorsvit.world.WorldRepository;
 
@@ -23,10 +25,15 @@ public class CharacterController {
 
     private final CharacterRepository characterRepository;
     private final WorldRepository worldRepository;
+    private final PlaceRepository placeRepository;
 
-    public CharacterController(CharacterRepository characterRepository, WorldRepository worldRepository) {
+    public CharacterController(
+            CharacterRepository characterRepository,
+            WorldRepository worldRepository,
+            PlaceRepository placeRepository) {
         this.characterRepository = characterRepository;
         this.worldRepository = worldRepository;
+        this.placeRepository = placeRepository;
     }
 
     @GetMapping
@@ -40,7 +47,7 @@ public class CharacterController {
         World world = requireWorld(worldId);
         Character character = new Character();
         character.setWorld(world);
-        apply(request, character);
+        apply(request, character, worldId);
         Character saved = characterRepository.save(character);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -48,7 +55,7 @@ public class CharacterController {
     @PutMapping("/{id}")
     public Character update(@PathVariable Long worldId, @PathVariable Long id, @Valid @RequestBody CharacterRequest request) {
         Character character = requireCharacter(worldId, id);
-        apply(request, character);
+        apply(request, character, worldId);
         return characterRepository.save(character);
     }
 
@@ -73,9 +80,26 @@ public class CharacterController {
         return character;
     }
 
-    private void apply(CharacterRequest request, Character character) {
+    private void apply(CharacterRequest request, Character character, Long worldId) {
         character.setName(request.name().trim());
         character.setDescription(request.description());
         character.setColor(request.color());
+        character.setPhotoUrl(request.photoUrl());
+        character.setEyeColor(request.eyeColor());
+        character.setSkinTone(request.skinTone());
+        character.setHairColor(request.hairColor());
+        character.setMbti(request.mbti());
+        character.setQuirks(request.quirks());
+        character.setFavoritePhrase(request.favoritePhrase());
+        character.setBornInPlace(resolvePlace(worldId, request.bornInPlaceId()));
+        character.setLivesInPlace(resolvePlace(worldId, request.livesInPlaceId()));
+    }
+
+    private Place resolvePlace(Long worldId, Long placeId) {
+        if (placeId == null) {
+            return null;
+        }
+        return placeRepository.findByIdAndWorld_Id(placeId, worldId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Place not found in world: " + worldId));
     }
 }
