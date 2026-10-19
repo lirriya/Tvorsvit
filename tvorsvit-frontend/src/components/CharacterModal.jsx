@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createCharacter, listPlaces, updateCharacter } from '../api.js';
+import CharacterRelationsPanel from './CharacterRelationsPanel.jsx';
 
 const MBTI_TYPES = [
   'ISTJ', 'ISFJ', 'INFJ', 'INTJ',
@@ -8,7 +9,7 @@ const MBTI_TYPES = [
   'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ',
 ];
 
-function CharacterModal({ worldId, character, onClose, onSaved }) {
+function CharacterModal({ worldId, character, characters, onClose, onSaved }) {
   const isEdit = Boolean(character);
   const [form, setForm] = useState(() => ({
     name: character?.name ?? '',
@@ -284,6 +285,10 @@ function CharacterModal({ worldId, character, onClose, onSaved }) {
             </button>
           </div>
         </form>
+
+        {isEdit && (
+          <CharacterRelationsPanel worldId={worldId} character={character} characters={characters ?? []} />
+        )}
       </section>
     </div>
   );
