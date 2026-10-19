@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPlace, updatePlace } from '../api.js';
+import PlaceRelationsPanel from './PlaceRelationsPanel.jsx';
 
 const DEFAULT_COLOR = '#646cff';
 
-function PlaceModal({ worldId, place, onClose, onSaved }) {
+function PlaceModal({ worldId, place, places, onClose, onSaved }) {
   const isEdit = Boolean(place);
   const [form, setForm] = useState(() => ({
     name: place?.name ?? '',
@@ -150,6 +151,10 @@ function PlaceModal({ worldId, place, onClose, onSaved }) {
             </button>
           </div>
         </form>
+
+        {isEdit && (
+          <PlaceRelationsPanel worldId={worldId} place={place} places={places ?? []} />
+        )}
       </section>
     </div>
   );
